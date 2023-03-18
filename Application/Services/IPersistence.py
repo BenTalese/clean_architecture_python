@@ -10,5 +10,5 @@ class IPersistence(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def Add(tEntity: TEntity) -> None:
+    def Remove(tEntity: TEntity) -> None:
         pass
