@@ -1,12 +1,13 @@
-from Application.Services import IPersistence
-from typing import TypeVar
+from Domain.Infrastructure.Generics import TEntity
+from Application.Services.IPersistence import IPersistence
 
-TEntity = TypeVar("TEntity")
 
 class Persistence(IPersistence):
+    def Add(self, tEntity: TEntity) -> None:
+        print("Added")
 
-    def Add(tEntity: TEntity) -> None:
-        print(1)
+    def Remove(self, tEntity: TEntity) -> None:
+        print("Removed")
 
-    def Remove(tEntity: TEntity) -> None:
-        print(2)
+    def SaveChanges(self) -> None:
+        print("Saved")

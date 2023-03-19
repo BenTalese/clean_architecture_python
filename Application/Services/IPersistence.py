@@ -1,14 +1,17 @@
-from abc import ABCMeta, abstractmethod
-from typing import TypeVar
+from abc import ABC, abstractmethod
 
-TEntity = TypeVar("TEntity")
+from Domain.Infrastructure.Generics import TEntity
 
-class IPersistence(metaclass=ABCMeta):
+class IPersistence(ABC):
 
     @abstractmethod
-    def Add(tEntity: TEntity) -> None:
+    def Add(self, tEntity: TEntity) -> None:
         pass
 
     @abstractmethod
-    def Remove(tEntity: TEntity) -> None:
+    def Remove(self, tEntity: TEntity) -> None:
+        pass
+
+    @abstractmethod
+    def SaveChanges(self) -> None:
         pass
