@@ -1,27 +1,10 @@
 from typing import Type, List
 
 """
-class Pipeline:
-    def __init__(self, interactor: IInteractor):
-        self.interactor = interactor
-        self.pipes = []
 
-    def add_pipe(self, pipe):
-        self.pipes.append(pipe)
 
-    def execute(self, input_port: IInputPort, output_port: IOutputPort):
-        errors = []
-        for pipe in self.pipes:
-            try:
-                pipe.validate(input_port, output_port)
-            except Exception as e:
-                errors.append(str(e))
-        
-        if errors:
-            output_port.PresentValidationFailures(errors)
-        else:
-            self.interactor.Handle(input_port, output_port)
-"""
+
+
 
 class Pipeline:
     def __init__(self, interactor: IInteractor, pipes: List[IInputPortValidator]):
@@ -43,7 +26,7 @@ class Pipeline:
 
 
 class Pipeline:
-    def __init__(self, pipes: List[Type[Pipe]]):
+    def __init__(self, pipes: List[Type[IPipe]]):
         self.pipes = [pipe() for pipe in pipes]
 
     def execute(self, data):
@@ -92,3 +75,6 @@ class UseCaseInvoker:
                     break
             elif isinstance(pipe, InteractorPipe):
                 pipe.handle(input_port, output_port)
+
+
+"""

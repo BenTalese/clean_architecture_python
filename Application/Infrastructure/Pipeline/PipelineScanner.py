@@ -1,73 +1,20 @@
 import os
 import importlib
 import inspect
+from typing import Dict, List, Type
+from abc import ABC
 
-class PipelineScanner:
-    def __init__(self, use_case_dir):
-        self.use_case_dir = use_case_dir
+import sys
+sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastructure.etc...
 
-    def scan(self):
-        pipes_registry = {}
-        for file in os.listdir(self.use_case_dir):
-            if file.endswith("_use_case.py"):
-                module_name = file[:-3]
-                module = importlib.import_module(f"{self.use_case_dir}.{module_name}")
-                for name, obj in inspect.getmembers(module):
-                    if inspect.isclass(obj) and issubclass(obj, IInteractor) and obj != IInteractor:
-                        pipes = [c() for _, c in inspect.getmembers(module, inspect.isclass) if
-                                 issubclass(c, IInputPortValidator) and c != IInputPortValidator]
-                        pipes_registry[name] = {"interactor": obj(), "pipes": pipes}
 
-        return pipes_registry
-    
-class PipelineScanner:
-    def __init__(self, use_case_dir):
-        self.use_case_dir = use_case_dir
-
-    def scan(self):
-        pipes_registry = {}
-        use_case_dir = os.path.join(self.use_case_dir, "Use Cases")
-        for file in os.listdir(use_case_dir):
-            if file.endswith("_use_case.py"):
-                module_name = file[:-3]
-                module = importlib.import_module(f"{self.use_case_dir}.Use Cases.{module_name}")
-                for name, obj in inspect.getmembers(module):
-                    if inspect.isclass(obj) and issubclass(obj, IInteractor) and obj != IInteractor:
-                        pipes = [c() for _, c in inspect.getmembers(module, inspect.isclass) if
-                                 issubclass(c, IInputPortValidator) and c != IInputPortValidator]
-                        pipes_registry[name] = {"interactor": obj(), "pipes": pipes}
-
-        return pipes_registry
-
-class PipelineScanner:
-    def __init__(self, use_case_dir):
-        self.use_case_dir = use_case_dir
-
-    def scan(self):
-        pipes_registry = {}
-        for root, dirs, files in os.walk(os.path.join(self.use_case_dir, "Use Cases")):
-            for file in files:
-                if file.endswith("_use_case.py"):
-                    module_name = file[:-3]
-                    module = importlib.import_module(f"{root.replace('/', '.')}.{module_name}")
-                    for name, obj in inspect.getmembers(module):
-                        if inspect.isclass(obj) and issubclass(obj, IInteractor) and obj != IInteractor:
-                            pipes = [c() for _, c in inspect.getmembers(module, inspect.isclass) if
-                                     issubclass(c, IInputPortValidator) and c != IInputPortValidator]
-                            pipes_registry[name] = {"interactor": obj(), "pipes": pipes}
-
-        return pipes_registry
+from Application.Infrastructure.Pipes.IPipe import IPipe
 
 
 
-
-
+"""
 class PipeScanner:
-    def __init__(self, directory: str):
-        self._directory = directory
 
-    def scan(self) -> Dict[str, List[Type[Pipe]]]:
-        use_cases = {}
         for file_name in os.listdir(self._directory):
             if file_name.startswith('__'):
                 continue
@@ -75,7 +22,6 @@ class PipeScanner:
             if os.path.isdir(path):
                 use_case_name = file_name.replace(' ', '')
                 use_cases[use_case_name] = self._scan_use_case(path)
-        return use_cases
 
     def _scan_use_case(self, path: str) -> List[Type[Pipe]]:
         pipes = []
@@ -89,3 +35,40 @@ class PipeScanner:
                     if inspect.isclass(member[1]) and issubclass(member[1], Pipe) and member[1] != Pipe:
                         pipes.append(member[1])
         return pipes
+
+module = importlib.import_module(f"{root.replace('/', '.')}.{module_name}")
+module = importlib.import_module(f"{self.use_case_dir}.Use Cases.{module_name}")
+if inspect.isclass(obj) and issubclass(obj, IInteractor) and obj != IInteractor:
+    pipes = [c() for _, c in inspect.getmembers(module, inspect.isclass) if
+                issubclass(c, IInputPortValidator) and c != IInputPortValidator]
+    pipes_registry[name] = {"interactor": obj(), "pipes": pipes}
+"""    
+
+
+class PipelineScanner:
+    def __init__(self, parent_use_case_folder_path: str):
+        self._parent_use_case_folder_path = parent_use_case_folder_path
+
+    test2 = os.path.dirname(os.path.realpath(__file__)) #'/home/benny/Repos/clean_architecture_python/Application/Infrastructure/Pipeline' (could set globally...)
+
+    print(dir(inspect))
+
+    def scan(self) -> Dict[str, List[Type[IPipe]]]:
+        pipes_registry = {}
+        for root, dirs, files in os.walk(self._parent_use_case_folder_path):
+            for file in files:
+                module_name = file[:-3]
+                module = importlib.import_module(f"{root.replace('/', '.')}.{module_name}")
+                for name, obj in inspect.getmembers(module):
+                    pipes = []
+                    if module_name != "ICreateTestEntityOutputPort": #should be own method (not the forbidden types)
+                        if issubclass(obj, IPipe): #should be own method (not the forbidden types)
+                    #if (issubclass(obj, IPipe) and module_name != "ICreateTestEntityOutputPort"): #should be own method (not the forbidden types)
+                            pipes.append(obj())
+                    pipes_registry[name] = {"interactor": obj(), "pipes": pipes}
+
+        print(pipes_registry)
+
+        return pipes_registry
+    
+PipelineScanner("Application/UseCases").scan()

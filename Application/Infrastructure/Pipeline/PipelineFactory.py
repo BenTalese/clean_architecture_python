@@ -1,3 +1,6 @@
+
+"""
+
 class PipelineFactory:
     def __init__(self, pipes_registry):
         self.pipes_registry = pipes_registry
@@ -75,3 +78,7 @@ class PipelineFactory:
                 modules.append(module_name)
 
         return modules
+    
+
+
+"""

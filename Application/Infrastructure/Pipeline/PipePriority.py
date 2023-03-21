@@ -1,5 +1,8 @@
 from typing import List, Tuple, Type
 
+
+"""
+
 PIPE_PRIORITY: List[Tuple[Type[IPipe], int]] = [
     (IInputPortValidator, 1),
     (IBusinessRuleValidator, 2)
@@ -22,3 +25,7 @@ def create_pipeline(use_case: str) -> Pipeline:
         pipeline.add_pipe(pipe)
 
     return pipeline
+
+
+
+"""
