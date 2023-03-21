@@ -4,4 +4,4 @@ TEntity = TypeVar("TEntity")
 TInputPort = TypeVar("TInputPort")
 TInteractor = TypeVar("TInteractor")
 TOutputPort = TypeVar("TOutputPort")
-TValidationFailure = TypeVar("TValidationFailure")
+TValidationFailure = TypeVar("TValidationFailure") #could be TValidationResult?
