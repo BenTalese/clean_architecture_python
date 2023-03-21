@@ -3,7 +3,7 @@ from .ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
 from Application.Infrastructure.Pipes.IInputPortValidator import IInputPortValidator
 
 
-class TestInputPortValidator(IInputPortValidator[CreateTestEntityInputPort, ICreateTestEntityOutputPort]):
+class CreateTestEntityInputPortValidator(IInputPortValidator[CreateTestEntityInputPort, ICreateTestEntityOutputPort]):
     
     def Validate(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort) -> bool:
         validationFailures = []
