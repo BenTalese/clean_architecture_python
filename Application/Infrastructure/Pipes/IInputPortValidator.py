@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Generic
-from ....Domain.Infrastructure.Generics import TInputPort, TOutputPort
+from Domain.Infrastructure.Generics import TInputPort, TOutputPort
 
 class IInputPortValidator(Generic[TInputPort, TOutputPort], ABC):
     
