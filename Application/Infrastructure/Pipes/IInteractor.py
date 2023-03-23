@@ -1,9 +1,14 @@
 from abc import ABC, abstractmethod
+from Application.Infrastructure.Pipes.IPipe import IPipe
 from Domain.Infrastructure.Generics import TInputPort, TOutputPort
 
-class IInteractor(ABC):
+class IInteractor(IPipe, ABC):
+
+    @property
+    def Priority() -> int:
+        return 2
 
     @abstractmethod
-    def Handle(self, inputPort: TInputPort, outputPort: TOutputPort) -> None:
+    def Execute(self, inputPort: TInputPort, outputPort: TOutputPort) -> bool:
         pass
     

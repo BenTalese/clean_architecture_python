@@ -5,7 +5,7 @@ from Application.Infrastructure.Pipes.IInputPortValidator import IInputPortValid
 
 class CreateTestEntityInputPortValidator(IInputPortValidator[CreateTestEntityInputPort, ICreateTestEntityOutputPort]):
     
-    def Validate(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort) -> bool:
+    def Execute(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort) -> bool:
         validationFailures = []
 
         if inputPort._input != "Hello":
@@ -13,7 +13,7 @@ class CreateTestEntityInputPortValidator(IInputPortValidator[CreateTestEntityInp
             validationFailures.append("Another message for testing.")
 
         if validationFailures:
-            outputPort.PresentValidationFailures(validationFailures)
+            outputPort.PresentValidationFailure(validationFailures)
             return False
 
         return True
