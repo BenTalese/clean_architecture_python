@@ -1,0 +1,6 @@
+Missing authentication pipe
+
+Could register a stopwatch as the start pipe and track time of use cases
+Or, do stopwatch at start of controller action in framework and stop it after everything finishes (full operation time)
+
+Could combine above two points to see a breakdown of what takes the bulk of the time, the framework or the core layer
