@@ -22,7 +22,7 @@ from Application.Infrastructure.Pipes.IInputPort import IInputPort
 from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPort import CreateTestEntityInputPort
 from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPortValidator import CreateTestEntityInputPortValidator
 from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInteractor import CreateTestEntityInteractor
-from Domain.Infrastructure.Generics import TInteractor, TOutputPort
+from Domain.Infrastructure.Generics import TInputPort, TInteractor, TOutputPort
 from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
 
 
@@ -107,15 +107,6 @@ class PipelineScanner:
     
 pipes_registry = PipelineScanner("Application/UseCases").scan()
 
-"""
-pipes_registry = {
-    "UseCase1": {
-        "interactor": CreateTestEntityInteractor(Persistence()),
-        "pipes": [CreateTestEntityInputPortValidator()]
-    }
-}
-"""
-
 # Create the pipeline factory with the pipes registry
 factory = PipelineFactory(pipes_registry)
 
@@ -131,3 +122,14 @@ pipeline.execute(invalid_input_port, output_port)
 # Create and execute the pipeline for UseCase2
 #pipeline = factory.create_pipeline("UseCase2")
 #pipeline.execute(input_port, output_port)
+
+class UseCaseInvoker():
+    def InvokeUseCase(inputPort: TInputPort, outputPort: TOutputPort):
+        pass
+
+class TestController():
+    def __init__(self, useCaseInvoker: UseCaseInvoker):
+        self._useCaseInvoker = useCaseInvoker
+
+    def CreateTestEntity(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort):
+        self._useCaseInvoker.InvokeUseCase(inputPort, outputPort)
