@@ -6,5 +6,5 @@ from Domain.Infrastructure.Generics import TInputPort, TOutputPort
 class IInputPortValidator(IPipe, Generic[TInputPort, TOutputPort], ABC):
     
     @property
-    def Priority() -> int:
+    def Priority(self) -> int:
         return 1

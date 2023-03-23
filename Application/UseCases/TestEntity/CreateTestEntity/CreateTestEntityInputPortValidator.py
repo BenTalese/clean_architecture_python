@@ -8,6 +8,8 @@ class CreateTestEntityInputPortValidator(IInputPortValidator[CreateTestEntityInp
     def Execute(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort) -> bool:
         validationFailures = []
 
+        print("CreateTestEntityInputPortValidator")
+
         if inputPort._input != "Hello":
             validationFailures.append("Text was not 'Hello'.")
             validationFailures.append("Another message for testing.")

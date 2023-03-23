@@ -5,7 +5,7 @@ from Domain.Infrastructure.Generics import TInputPort, TOutputPort
 class IInteractor(IPipe, ABC):
 
     @property
-    def Priority() -> int:
+    def Priority(self) -> int:
         return 2
 
     @abstractmethod

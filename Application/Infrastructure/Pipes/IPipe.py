@@ -7,7 +7,7 @@ class IPipe(Generic[TInputPort, TOutputPort], ABC):
     
     @property
     @abstractmethod
-    def Priority() -> int:
+    def Priority(self) -> int:
         pass
 
     @abstractmethod

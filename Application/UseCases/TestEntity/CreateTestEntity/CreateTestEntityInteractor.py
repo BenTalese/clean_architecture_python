@@ -9,11 +9,11 @@ from dependency_injector.wiring import inject, Provide
 
 class CreateTestEntityInteractor(IInteractor):
 
-    @inject
     def __init__(self, persistence: IPersistence):
         self._persistence = persistence
     
     def Execute(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort) -> bool:
+        print("CreateTestEntityInteractor")
         x = TestEntity(id=uuid.uuid4(), testText=inputPort._input)
         self._persistence.Add(self, tEntity=x)
         outputPort.PresentTest(TestDto(id=uuid.uuid4(), testText=inputPort._input))
