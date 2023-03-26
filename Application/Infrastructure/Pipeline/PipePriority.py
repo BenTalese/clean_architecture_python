@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List, Tuple, Type
 
 
@@ -29,3 +30,8 @@ def create_pipeline(use_case: str) -> Pipeline:
 
 
 """
+
+class PriorityEnum(Enum):
+    InputPortValidator = 1
+    BusinessRuleValidator = 2
+    Interactor = 3
