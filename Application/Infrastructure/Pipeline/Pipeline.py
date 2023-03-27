@@ -78,3 +78,11 @@ class UseCaseInvoker:
 
 
 """
+
+class Pipeline:
+    def __init__(self, pipes: List[IInputPortValidator]):
+        self.pipes = pipes
+
+    def execute(self, input_port: IInputPort, output_port: TOutputPort):
+        for pipe in self.pipes:
+            pipe.Execute(input_port, output_port)

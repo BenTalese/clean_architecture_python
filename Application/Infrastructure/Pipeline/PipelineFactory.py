@@ -82,3 +82,20 @@ class PipelineFactory:
 
 
 """
+
+
+
+from Application.Infrastructure.Pipeline.PipePriority import PriorityEnum
+from Application.Infrastructure.Pipeline.Pipeline import Pipeline
+
+
+class PipelineFactory:
+    def __init__(self, pipes_registry):
+        self.pipes_registry = pipes_registry
+
+    def create_pipeline(self, use_case_name):
+        #pipes = [self.pipes_registry[p] for p in self.pipes_registry if p in use_case_name]
+        pipes = self.pipes_registry[use_case_name]["pipes"]
+        sorted_pipes = sorted(pipes, key=lambda pipe: PriorityEnum[type(pipe).__name__].value)
+        sorted_pipes2 = sorted(pipes, key=lambda p: p.Priority)
+        return Pipeline(sorted_pipes)

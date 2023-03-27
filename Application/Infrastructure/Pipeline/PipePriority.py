@@ -27,7 +27,11 @@ def create_pipeline(use_case: str) -> Pipeline:
 
     return pipeline
 
-
+PIPE_PRIORITY: List[Tuple[Type[IPipe], int]] = [
+    (IInputPortValidator, 1),
+    (IBusinessRuleValidator, 2),
+    (IInteractor, 3)
+]
 
 """
 
