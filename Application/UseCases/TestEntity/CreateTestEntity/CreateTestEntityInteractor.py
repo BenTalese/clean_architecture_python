@@ -9,8 +9,8 @@ from dependency_injector.wiring import inject, Provide
 
 class CreateTestEntityInteractor(IInteractor):
 
-    def __init__(self, d_persistence: IPersistence):
-        self._persistence = d_persistence
+    def __init__(self, DI_persistence: IPersistence):
+        self._persistence = DI_persistence
     
     def Execute(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort) -> bool:
         print("CreateTestEntityInteractor")
