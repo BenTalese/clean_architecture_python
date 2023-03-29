@@ -4,19 +4,19 @@ import os
 import sys
 from abc import ABC
 from typing import Dict, List, Type
+from Application.Infrastructure.Pipeline.Container import Container
+from Application.Infrastructure.Pipeline.ContainerExtensions import ContainerExtensions
 from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInteractor import CreateTestEntityInteractor
 from Application.Infrastructure.Pipes.IPipe import IPipe
 
 from Domain.Errors.InterfaceNotImplementedError import InterfaceNotImplementedError
 
 
-
 sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastructure.etc...
 
-
-"""
 class PipelineScanner:
-    def __init__(self, parent_use_case_folder_path: str):
+    def __init__(self, container: Container, parent_use_case_folder_path: str):
+        self._container = container
         self._parent_use_case_folder_path = parent_use_case_folder_path
 
     test2 = os.path.dirname(os.path.realpath(__file__)) #'/home/benny/Repos/clean_architecture_python/Application/Infrastructure/Pipeline' (could set globally...)
@@ -33,13 +33,13 @@ class PipelineScanner:
                 obj = getattr(module, module_name, None)
                 if issubclass(obj, IPipe):
                     try:
-                        pipe = container.providers.get(module_name)
-                        pipes.append(pipe())
+                        pipe = ContainerExtensions.GetService(self._container, obj)
+                        pipes.append(pipe)
                     except TypeError:
                         raise InterfaceNotImplementedError(module_name)
-            if pipes.__len__() > 0:
-                pipes_registry[root.split("/")[-1]] = { "pipes": pipes }
+            if pipes:
+                pipes_registry[root.replace('/', '.')] = { "pipes": pipes }
+                #pipes_registry[root.split("/")[-1]] = { "pipes": pipes }
                 #pipes_registry[os.path.basename(dirpath)] = {"interactor": CreateTestEntityInteractor(Persistence()), "pipes": pipes}
 
         return pipes_registry
-"""

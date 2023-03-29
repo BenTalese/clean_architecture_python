@@ -5,7 +5,6 @@ from .ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
 from Application.Dtos.TestDto import TestDto
 from Domain.Entities.TestEntity import TestEntity
 import uuid
-from dependency_injector.wiring import inject, Provide
 
 class CreateTestEntityInteractor(IInteractor):
 

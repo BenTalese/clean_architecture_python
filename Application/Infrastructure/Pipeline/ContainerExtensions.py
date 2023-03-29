@@ -10,10 +10,6 @@ from typing import List
 
 sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastructure.etc...
 
-directory_exclusion_list = ["__pycache__"]
-file_exclusion_list = ["__init__.py"]
-scan_locations = ["Application/UseCases", "Framework/Infrastructure"]
-
 class ContainerExtensions():
 
     @staticmethod

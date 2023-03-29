@@ -4,18 +4,18 @@ from Application.Infrastructure.Pipes.IInputPortValidator import IInputPortValid
 
 
 class CreateTestEntityInputPortValidator(IInputPortValidator[CreateTestEntityInputPort, ICreateTestEntityOutputPort]):
-    
-    def Execute(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort) -> bool:
-        validationFailures = []
 
-        print("CreateTestEntityInputPortValidator")
+    def Execute(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort) -> bool:
+        self._failures = []
 
         if inputPort._input != "Hello":
-            validationFailures.append("Text was not 'Hello'.")
-            validationFailures.append("Another message for testing.")
+            self._failures.append("Text was not 'Hello'.")
+            self._failures.append("Another message for testing.")
 
-        if validationFailures:
-            outputPort.PresentValidationFailure(validationFailures)
-            return False
+        #if validationFailures:
+            #outputPort.PresentValidationFailure(validationFailures)
+            #return False
+        
+        #self._canInvokeNextPipe = False
 
         return True

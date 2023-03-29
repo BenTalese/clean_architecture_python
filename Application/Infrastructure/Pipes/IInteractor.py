@@ -4,6 +4,10 @@ from Application.Infrastructure.Pipes.IPipe import IPipe
 from Domain.Infrastructure.Generics import TInputPort, TOutputPort
 
 class IInteractor(IPipe, ABC):
+    
+    @property
+    def CanInvokeNextPipe(self) -> bool:
+        pass
 
     @property
     def Priority(self) -> PriorityEnum:

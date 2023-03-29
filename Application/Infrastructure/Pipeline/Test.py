@@ -1,3 +1,60 @@
+import os
+import sys
+
+from Application.Infrastructure.Pipeline.Container import Container
+from Application.Infrastructure.Pipeline.ContainerExtensions import ContainerExtensions
+from Application.Infrastructure.Pipeline.PipelineFactory import PipelineFactory
+from Application.Infrastructure.Pipeline.PipelineScanner import PipelineScanner
+from Application.Infrastructure.Pipeline.UseCaseInvoker import UseCaseInvoker
+from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPort import CreateTestEntityInputPort
+from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
+
+
+sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastructure.etc...
+
+directory_exclusion_list = ["__pycache__"]
+file_exclusion_list = ["__init__.py", "ICreateTestEntityOutputPort.py"]
+scan_locations = ["Application/UseCases", "Framework/Infrastructure"]
+
+container = Container()
+ContainerExtensions.Register(container, scan_locations, directory_exclusion_list, file_exclusion_list)
+
+pipes_registry = PipelineScanner(container, "Application/UseCases").scan() # TODO: There may be multiple scan locations
+
+# Create the pipeline factory with the pipes registry
+factory = PipelineFactory(pipes_registry)
+
+invoker = UseCaseInvoker(factory)
+
+# Create the input and output ports
+invalid_input_port = CreateTestEntityInputPort("test")
+valid_input_port = CreateTestEntityInputPort("Hello")
+output_port = CreateTestEntityPresenter()
+
+
+invoker.InvokeUseCase(invalid_input_port, output_port)
+
+
+
+# Create and execute the pipeline for UseCase1
+#pipeline = factory.create_pipeline("CreateTestEntity") # TODO: Change from getting pipeline by name to getting by InputPort from pipes registry
+#pipeline.execute(invalid_input_port, output_port)
+
+# Create and execute the pipeline for UseCase2
+#pipeline = factory.create_pipeline("UseCase2")
+#pipeline.execute(input_port, output_port)
+
+
+
+
+
+
+
+
+
+
+
+
 from abc import ABC
 from enum import Enum
 import importlib
@@ -18,7 +75,6 @@ from Application.UseCases.TestEntity.CreateTestEntity.ICreateTestEntityOutputPor
 from Domain.Errors.InterfaceNotImplementedError import InterfaceNotImplementedError
 
 from Framework.Infrastructure.Persistence import Persistence
-sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastructure.etc...
 
 from Application.Infrastructure.Pipes.IInputPort import IInputPort
 from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPort import CreateTestEntityInputPort
@@ -38,6 +94,8 @@ Options:
 
 #could get by name of module?... that would mean these would all need to be called by exact name, e.g. CreateTestEntityInputPortValidator instead of _createTestEntityInputPortValidator
 
+"""
+sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastructure.etc...
 container = Container()
 ContainerExtensions.Register(container, scan_locations, directory_exclusion_list, file_exclusion_list)
 z = ContainerExtensions.GetService(Container, D)
@@ -45,7 +103,8 @@ xx = ContainerExtensions.GetService(container, Persistence) #DI_Persistence isn'
 xxx = ContainerExtensions.GetService(container, CreateTestEntityInteractor)
 xxxx = container.providers
 v = 0
-"""
+
+
 container = Container()
 
 x = container.C()
@@ -96,23 +155,7 @@ class PipelineValidator:
 
 
 """
-pipes_registry = PipelineScanner("Application/UseCases").scan()
 
-# Create the pipeline factory with the pipes registry
-factory = PipelineFactory(pipes_registry)
-
-# Create the input and output ports
-invalid_input_port = CreateTestEntityInputPort("test")
-valid_input_port = CreateTestEntityInputPort("Hello")
-output_port = CreateTestEntityPresenter()
-
-# Create and execute the pipeline for UseCase1
-pipeline = factory.create_pipeline("CreateTestEntity")
-pipeline.execute(invalid_input_port, output_port)
-
-# Create and execute the pipeline for UseCase2
-#pipeline = factory.create_pipeline("UseCase2")
-#pipeline.execute(input_port, output_port)
 
 class UseCaseInvoker():
     def InvokeUseCase(inputPort: TInputPort, outputPort: TOutputPort):

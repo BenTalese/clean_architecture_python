@@ -1,14 +1,28 @@
+from typing import List, Type
+from Application.Infrastructure.Pipes.IInputPort import IInputPort
+from Application.Infrastructure.Pipes.IPipe import IPipe
 
-"""
 
 class PipelineFactory:
     def __init__(self, pipes_registry):
         self.pipes_registry = pipes_registry
 
-    def create_pipeline(self, use_case_name):
-        pipes = [self.pipes_registry[p] for p in self.pipes_registry if p in use_case_name]
-        interactor = self.pipes_registry[use_case_name]["interactor"]
-        return Pipeline(interactor, pipes)
+    def create_pipeline(self, inputPort: IInputPort) -> List[Type[IPipe]]:
+        usecase_key = inputPort.__module__.rsplit(".", 1)[0]
+        try:
+            pipes = self.pipes_registry[usecase_key]["pipes"]
+        except:
+            raise KeyError(f"Could not find '{inputPort}' in the pipeline registry.")
+        
+        if pipes is None:
+            raise Exception(f"Pipeline registry for '{inputPort}' contained no pipes.")
+        
+        sorted_pipes = sorted(pipes, key=lambda pipe: pipe.Priority.value)
+        return sorted_pipes
+
+
+
+"""
     
 class PipelineFactory:
     def __init__(self, scanner):
@@ -21,21 +35,6 @@ class PipelineFactory:
         pipes = pipes_registry[use_case_name]["pipes"]
         interactor = pipes_registry[use_case_name]["interactor"]
         return Pipeline(pipes, interactor)
-
-
-
-class PipelineFactory:
-    def __init__(self, pipe_scanner: PipeScanner):
-        self.pipe_scanner = pipe_scanner
-
-    def create_pipeline(self, use_case_name: str) -> Pipeline:
-        pipes = self.pipe_scanner.scan().get(use_case_name, [])
-        return Pipeline(pipes)
-    
-
-
-
-
 
 
 
@@ -82,20 +81,3 @@ class PipelineFactory:
 
 
 """
-
-
-
-from Application.Infrastructure.Pipeline.PipePriority import PriorityEnum
-from Application.Infrastructure.Pipeline.Pipeline import Pipeline
-
-
-class PipelineFactory:
-    def __init__(self, pipes_registry):
-        self.pipes_registry = pipes_registry
-
-    def create_pipeline(self, use_case_name):
-        #pipes = [self.pipes_registry[p] for p in self.pipes_registry if p in use_case_name]
-        pipes = self.pipes_registry[use_case_name]["pipes"]
-        sorted_pipes = sorted(pipes, key=lambda pipe: PriorityEnum[type(pipe).__name__].value)
-        sorted_pipes2 = sorted(pipes, key=lambda p: p.Priority)
-        return Pipeline(sorted_pipes)
