@@ -37,5 +37,6 @@ PIPE_PRIORITY: List[Tuple[Type[IPipe], int]] = [
 
 class PriorityEnum(Enum):
     InputPortValidator = 1
-    BusinessRuleValidator = 2
-    Interactor = 3
+    AuthorisationEnforcer = 2
+    BusinessRuleValidator = 3
+    Interactor = 4
