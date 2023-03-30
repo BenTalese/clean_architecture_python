@@ -1,19 +1,12 @@
 from abc import ABC, abstractmethod
-from Application.Infrastructure.Pipeline.PipePriority import PriorityEnum
+from typing import Generic
+from Application.Infrastructure.Pipeline.PipePriority import PipePriority
 from Application.Infrastructure.Pipes.IPipe import IPipe
 from Domain.Infrastructure.Generics import TInputPort, TOutputPort
 
-class IInteractor(IPipe, ABC):
-    
-    @property
-    def CanInvokeNextPipe(self) -> bool:
-        pass
+class IInteractor(IPipe, Generic[TInputPort, TOutputPort], ABC):
 
     @property
-    def Priority(self) -> PriorityEnum:
-        return PriorityEnum.Interactor
-
-    @abstractmethod
-    def Execute(self, inputPort: TInputPort, outputPort: TOutputPort) -> bool:
-        pass
+    def Priority(self) -> PipePriority:
+        return PipePriority.Interactor
     

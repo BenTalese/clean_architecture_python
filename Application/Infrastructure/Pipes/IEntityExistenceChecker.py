@@ -1,13 +1,10 @@
 from abc import ABC
+from typing import Generic
 from Application.Infrastructure.Pipeline.PipePriority import PipePriority
 from Application.Infrastructure.Pipes.IPipe import IPipe
+from Domain.Infrastructure.Generics import TInputPort, TOutputPort
 
-class IEntityExistenceChecker(IPipe, ABC):
-    
-    @property
-    def CanInvokeNextPipe(self) -> bool:
-        return self.m_CanInvokeNextPipe
-        #return not self._failures
+class IEntityExistenceChecker(IPipe, Generic[TInputPort, TOutputPort], ABC):
     
     @property
     def Priority(self) -> PipePriority:

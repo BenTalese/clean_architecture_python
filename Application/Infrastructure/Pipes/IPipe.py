@@ -1,19 +1,20 @@
 from abc import ABC, abstractmethod
 from typing import Generic
-from Application.Infrastructure.Pipeline.PipePriority import PriorityEnum
-
+from Application.Infrastructure.Pipeline.PipePriority import PipePriority
 from Domain.Infrastructure.Generics import TInputPort, TOutputPort
 
 class IPipe(Generic[TInputPort, TOutputPort], ABC):
 
+    def __init__(self):
+        self.m_CanInvokeNextPipe = True
+
     @property
-    @abstractmethod
     def CanInvokeNextPipe(self) -> bool:
-        pass
+        return self.m_CanInvokeNextPipe
     
     @property
     @abstractmethod
-    def Priority(self) -> PriorityEnum:
+    def Priority(self) -> PipePriority:
         pass
 
     @abstractmethod
