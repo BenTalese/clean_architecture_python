@@ -1,19 +1,14 @@
-from abc import ABC, abstractmethod
-from typing import Generic
-
+from abc import ABC
+from Application.Infrastructure.Pipeline.PipePriority import PipePriority
 from Application.Infrastructure.Pipes.IPipe import IPipe
-from Domain.Infrastructure.Generics import TInputPort, TOutputPort
 
-class IEntityExistenceChecker(IPipe, Generic[TInputPort, TOutputPort], ABC):
-
+class IEntityExistenceChecker(IPipe, ABC):
+    
     @property
-    def Priority(self) -> int:
-        return 0
+    def CanInvokeNextPipe(self) -> bool:
+        return self.m_CanInvokeNextPipe
+        #return not self._failures
     
-    def Execute(self, inputPort: TInputPort, outputPort: TOutputPort) -> TOutputPort:
-        return super().Execute(inputPort, outputPort)
-    
-    @abstractmethod
-    def DoesEntityExist(self, input_port: TInputPort, output_port: TOutputPort) -> bool:
-        pass
-    
+    @property
+    def Priority(self) -> PipePriority:
+        return PipePriority.EntityExistenceChecker
