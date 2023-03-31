@@ -10,7 +10,7 @@ from typing import List
 
 sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastructure.etc...
 
-class ServiceProviderExtensions():
+class ServiceProviderExtensions:
 
     @staticmethod
     def GetService(serviceProvider: ServiceProvider, service: object) -> object:
