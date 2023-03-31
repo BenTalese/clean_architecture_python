@@ -4,8 +4,8 @@ import os
 import sys
 from abc import ABC
 from typing import Dict, List, Type
-from Application.Infrastructure.Pipeline.Container import Container
-from Application.Infrastructure.Pipeline.ContainerExtensions import ContainerExtensions
+from Application.Infrastructure.Pipeline.ServiceProvider import Container
+from Application.Infrastructure.Pipeline.ServiceProviderExtensions import ContainerExtensions
 from Application.Infrastructure.Pipes.IPipe import IPipe
 
 from Domain.Errors.InterfaceNotImplementedError import InterfaceNotImplementedError

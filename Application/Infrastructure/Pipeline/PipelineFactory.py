@@ -9,13 +9,17 @@ class PipelineFactory:
 
     def create_pipeline(self, inputPort: IInputPort) -> List[Type[IPipe]]:
         usecase_key = inputPort.__module__.rsplit(".", 1)[0]
-        try:
-            pipes = self.pipes_registry[usecase_key]["pipes"]
-        except:
+
+        if usecase_key not in self.pipes_registry:
             raise KeyError(f"Could not find '{inputPort}' in the pipeline registry.")
+        
+        pipes = self.pipes_registry[usecase_key]["pipes"]
         
         if pipes is None:
             raise Exception(f"Pipeline registry for '{inputPort}' contained no pipes.")
+        
+        if any(pipe is None for pipe in pipes):
+            raise Exception(f"One of the pipes for the use case '{usecase_key}' is not configured correctly.")
         
         sorted_pipes = sorted(pipes, key=lambda pipe: pipe.Priority.value)
         return sorted_pipes
@@ -24,17 +28,7 @@ class PipelineFactory:
 
 """
     
-class PipelineFactory:
-    def __init__(self, scanner):
-        self.scanner = scanner
 
-    def create_pipeline(self, use_case_name):
-        pipes_registry = self.scanner.scan()
-        if use_case_name not in pipes_registry:
-            raise ValueError(f"No pipeline found for use case {use_case_name}")
-        pipes = pipes_registry[use_case_name]["pipes"]
-        interactor = pipes_registry[use_case_name]["interactor"]
-        return Pipeline(pipes, interactor)
 
 
 

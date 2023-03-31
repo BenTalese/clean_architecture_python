@@ -3,25 +3,25 @@ import importlib
 import inspect
 import os
 import sys
-from Application.Infrastructure.Pipeline.Container import Container
+from Application.Infrastructure.Pipeline.ServiceProvider import ServiceProvider
 from Application.Infrastructure.Pipeline.INTERFACE_LOOKUP import INTERFACE_TO_CONCRETE
 from dependency_injector import providers
 from typing import List
 
 sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastructure.etc...
 
-class ContainerExtensions():
+class ServiceProviderExtensions():
 
     @staticmethod
-    def GetService(container: Container, service):
+    def GetService(serviceProvider: ServiceProvider, service: object) -> object:
         try:
-            x = container.providers.get(service.__name__)()
-            return x
+            return serviceProvider.providers.get(service.__name__)()
         except Exception as e:
             print(f"Was not able to retrive '{service.__name__}' from DI container. (Original exception: {e}.)")
 
+    # TODO: Currently this registers everything as a factory (need option to do singleton)
     @staticmethod
-    def Register(container: Container, scan_locations: List[str], directory_exclusion_list: List[str], file_exclusion_list: List[str]):
+    def ConfigureServices(serviceProvider: ServiceProvider, scan_locations: List[str], directory_exclusion_list: List[str], file_exclusion_list: List[str]):
         for path in scan_locations:
             for root, dirs, files in os.walk(path):
                 dirs[:] = [d for d in dirs if d not in directory_exclusion_list]

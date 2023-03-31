@@ -1,8 +1,8 @@
 import os
 import sys
 
-from Application.Infrastructure.Pipeline.Container import Container
-from Application.Infrastructure.Pipeline.ContainerExtensions import ContainerExtensions
+from Application.Infrastructure.Pipeline.ServiceProvider import ServiceProvider
+from Application.Infrastructure.Pipeline.ServiceProviderExtensions import ServiceProviderExtensions
 from Application.Infrastructure.Pipeline.PipelineFactory import PipelineFactory
 from Application.Infrastructure.Pipeline.PipelineScanner import PipelineScanner
 from Application.Infrastructure.Pipeline.UseCaseInvoker import UseCaseInvoker
@@ -12,19 +12,38 @@ from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
 
 sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastructure.etc...
 
+# TODO: Pipes folder should be under services...I think, maybe also OutputPorts?
+
+"""
+IServiceCollectionExtensions
+    ConfigureServices()
+        CLAM.Register()
+            ConfigurePipeline()
+            ScanAssemblies()
+            Validate()
+"""
+
 directory_exclusion_list = ["__pycache__"]
 file_exclusion_list = ["__init__.py", "ICreateTestEntityOutputPort.py"]
-scan_locations = ["Application/UseCases", "Framework/Infrastructure"]
+di_scan_locations = ["Application/UseCases", "Framework/Infrastructure"]
 
-container = Container()
-ContainerExtensions.Register(container, scan_locations, directory_exclusion_list, file_exclusion_list)
+_UseCaseScanLocations = ["Application/UseCases"]
 
-pipes_registry = PipelineScanner(container, "Application/UseCases").scan() # TODO: There may be multiple scan locations
+_ServiceProvider = ServiceProvider()
+ServiceProviderExtensions.ConfigureServices(_ServiceProvider, di_scan_locations, directory_exclusion_list, file_exclusion_list)
+
+# TODO: Put pipes registry and factory inside invoker
+pipes_registry = PipelineScanner(_ServiceProvider, "Application/UseCases").scan() # TODO: There may be multiple scan locations
 
 # Create the pipeline factory with the pipes registry
 factory = PipelineFactory(pipes_registry)
 
-invoker = UseCaseInvoker(factory)
+#invoker = UseCaseInvoker(factory)
+invoker: UseCaseInvoker = ServiceProviderExtensions.GetService(_ServiceProvider, UseCaseInvoker)
+invoker.Configure(_UseCaseScanLocations)
+
+
+
 
 # Create the input and output ports
 invalid_input_port = CreateTestEntityInputPort("test")
@@ -145,12 +164,8 @@ Storage Options:
 
 class PipelineValidator:
     @staticmethod
-    def ValidatePipeline():
+    def validate_pipeline():
         pass
-
-
-
-
 
 
 
@@ -167,4 +182,28 @@ class TestController():
 
     def CreateTestEntity(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort):
         self._useCaseInvoker.InvokeUseCase(inputPort, outputPort)
+"""
+
+
+
+
+"""
+Style Guide
+
+class: ExampleClass
+method: ExampleMethod
+parameter: exampleParameter
+instance member: m_ExampleMember
+local variable: _ExampleVariable
+constant: EXAMPLE_CONSTANT
+static member: s_ExampleMember
+
+class: ExampleClass
+method: example_method
+parameter: example_parameter
+instance member: _exampleMember
+local variable: _ExampleVariable
+constant: EXAMPLE_CONSTANT
+static member: s_ExampleMember
+
 """
