@@ -1,5 +1,5 @@
+from Application.Infrastructure.Pipes.IInteractor import IInteractor
 from Application.Services.IPersistence import IPersistence
-from clapy.pipes.IInteractor import IInteractor
 from .CreateTestEntityInputPort import CreateTestEntityInputPort
 from .ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
 from Application.Dtos.TestDto import TestDto

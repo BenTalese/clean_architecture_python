@@ -1,6 +1,7 @@
 from typing import List, Type
-from clapy.pipes.IInputPort import IInputPort
-from clapy.pipes.IPipe import IPipe
+from Application.Infrastructure.Pipes.IInputPort import IInputPort
+from Application.Infrastructure.Pipes.IPipe import IPipe
+
 
 class PipelineFactory:
     def __init__(self, pipes_registry):

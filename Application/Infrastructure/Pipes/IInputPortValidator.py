@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Generic
+from Application.Infrastructure.Pipeline.PipePriority import PipePriority
+from Application.Infrastructure.Pipes.IPipe import IPipe
 from Domain.Infrastructure.Generics import TInputPort, TOutputPort
-from clapy.pipes.IPipe import IPipe
-from clapy.pipes.PipePriority import PipePriority
 
 class IInputPortValidator(IPipe, Generic[TInputPort, TOutputPort], ABC):
     

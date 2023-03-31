@@ -1,4 +1,4 @@
-from clapy.pipes.IEntityExistenceChecker import IEntityExistenceChecker
+from Application.Infrastructure.Pipes.IEntityExistenceChecker import IEntityExistenceChecker
 from .CreateTestEntityInputPort import CreateTestEntityInputPort
 from .ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
 
