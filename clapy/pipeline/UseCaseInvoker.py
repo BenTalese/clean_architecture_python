@@ -1,11 +1,11 @@
 from typing import List
-from Application.Infrastructure.Pipeline.PipelineFactory import PipelineFactory
-from Application.Infrastructure.Pipeline.PipelineScanner import PipelineScanner
-from Application.Infrastructure.Pipeline.ServiceProvider import ServiceProvider
-from Application.Infrastructure.Pipeline.ServiceProviderExtensions import ServiceProviderExtensions
-from Application.Infrastructure.Pipes.IInteractor import IInteractor
-from Application.Infrastructure.Pipes.IPipe import IPipe
 from Domain.Infrastructure.Generics import TInputPort, TOutputPort
+from clapy.pipeline.PipelineFactory import PipelineFactory
+from clapy.pipeline.PipelineScanner import PipelineScanner
+from clapy.pipeline.ServiceProvider import ServiceProvider
+from clapy.pipeline.ServiceProviderExtensions import ServiceProviderExtensions
+from clapy.pipes.IInteractor import IInteractor
+from clapy.pipes.IPipe import IPipe
 
 class UseCaseInvoker:
     def __init__(self, serviceProvider: ServiceProvider):

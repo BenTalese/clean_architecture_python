@@ -1,6 +1,6 @@
+from clapy.pipes.IInputPortValidator import IInputPortValidator
 from .CreateTestEntityInputPort import CreateTestEntityInputPort
 from .ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
-from Application.Infrastructure.Pipes.IInputPortValidator import IInputPortValidator
 
 
 class CreateTestEntityInputPortValidator(IInputPortValidator[CreateTestEntityInputPort, ICreateTestEntityOutputPort]):

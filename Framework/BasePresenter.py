@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from Application.Infrastructure.OutputPorts.IValidationOutputPort import IValidationOutputPort
+from clapy.outputports.IValidationOutputPort import IValidationOutputPort
 from Domain.Infrastructure.Generics import TValidationFailure
 
 

@@ -3,8 +3,8 @@ import importlib
 import inspect
 import os
 import sys
-from Application.Infrastructure.Pipeline.ServiceProvider import ServiceProvider
-from Application.Infrastructure.Pipeline.INTERFACE_LOOKUP import INTERFACE_TO_CONCRETE
+from clapy.pipeline.INTERFACE_LOOKUP import INTERFACE_TO_CONCRETE
+from clapy.pipeline.ServiceProvider import ServiceProvider
 from dependency_injector import providers
 from typing import List
 
@@ -60,12 +60,12 @@ class ServiceProviderExtensions():
                     
                     # For each dependency, check if the container has it registered and if not add it
                     for dependency_name, dependency_class in dependencies:
-                        if not hasattr(container, dependency_name):
-                            setattr(container, dependency_name, dependency_class)
+                        if not hasattr(serviceProvider, dependency_name):
+                            setattr(serviceProvider, dependency_name, dependency_class)
                     
                     # Create a dictionary of dependencies to add to the class being registered (gets dependencies from container attributes)
                     dependency_dict = {
-                        dependency_name: getattr(container, dependency_name) for dependency_name, dependency_class in dependencies
+                        dependency_name: getattr(serviceProvider, dependency_name) for dependency_name, dependency_class in dependencies
                     }
 
                     # TODO: This is repeating code
@@ -76,7 +76,7 @@ class ServiceProviderExtensions():
                             # Get concrete class and append to dependencies
                             concrete_class = [x[1] for x in INTERFACE_TO_CONCRETE if x[0] == module_class][0]
                             setattr(
-                                container,
+                                serviceProvider,
                                 module_name,
                                 providers.Factory(concrete_class, *dependency_dict.values())
                             )
@@ -84,7 +84,7 @@ class ServiceProviderExtensions():
                             raise LookupError(f"Interface '{module_class.__name__}' does not have a concrete class registered.")
                     else:
                         setattr(
-                            container,
+                            serviceProvider,
                             module_name,
                             providers.Factory(module_class, *dependency_dict.values())
                         )

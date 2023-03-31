@@ -4,17 +4,17 @@ import os
 import sys
 from abc import ABC
 from typing import Dict, List, Type
-from Application.Infrastructure.Pipeline.ServiceProvider import Container
-from Application.Infrastructure.Pipeline.ServiceProviderExtensions import ContainerExtensions
-from Application.Infrastructure.Pipes.IPipe import IPipe
 
 from Domain.Errors.InterfaceNotImplementedError import InterfaceNotImplementedError
+from clapy.pipeline.ServiceProvider import ServiceProvider
+from clapy.pipeline.ServiceProviderExtensions import ServiceProviderExtensions
+from clapy.pipes.IPipe import IPipe
 
 
 sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastructure.etc...
 
 class PipelineScanner:
-    def __init__(self, container: Container, parent_use_case_folder_path: str):
+    def __init__(self, container: ServiceProvider, parent_use_case_folder_path: str):
         self._container = container
         self._parent_use_case_folder_path = parent_use_case_folder_path
 
@@ -32,7 +32,7 @@ class PipelineScanner:
                 obj = getattr(module, module_name, None)
                 if issubclass(obj, IPipe):
                     try:
-                        pipe = ContainerExtensions.GetService(self._container, obj)
+                        pipe = ServiceProviderExtensions.GetService(self._container, obj)
                         pipes.append(pipe)
                     except TypeError:
                         raise InterfaceNotImplementedError(module_name)

@@ -1,13 +1,13 @@
 import os
 import sys
 
-from Application.Infrastructure.Pipeline.ServiceProvider import ServiceProvider
-from Application.Infrastructure.Pipeline.ServiceProviderExtensions import ServiceProviderExtensions
-from Application.Infrastructure.Pipeline.PipelineFactory import PipelineFactory
-from Application.Infrastructure.Pipeline.PipelineScanner import PipelineScanner
-from Application.Infrastructure.Pipeline.UseCaseInvoker import UseCaseInvoker
 from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPort import CreateTestEntityInputPort
 from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
+from clapy.pipeline.PipelineFactory import PipelineFactory
+from clapy.pipeline.PipelineScanner import PipelineScanner
+from clapy.pipeline.ServiceProvider import ServiceProvider
+from clapy.pipeline.ServiceProviderExtensions import ServiceProviderExtensions
+from clapy.pipeline.UseCaseInvoker import UseCaseInvoker
 
 
 sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastructure.etc...
@@ -80,22 +80,17 @@ import importlib
 import inspect
 import os
 import sys
-from Application.Infrastructure.Pipes.IBusinessRuleValidator import IBusinessRuleValidator
-from Application.Infrastructure.Pipes.IInteractor import IInteractor
 from Application.Services.IPersistence import IPersistence
 from dependency_injector import containers, providers
 from dependency_injector.wiring import inject, Provide
 from pprint import pprint
 
 from typing import Dict, List, Type, Tuple
-from Application.Infrastructure.Pipes.IInputPortValidator import IInputPortValidator
-from Application.Infrastructure.Pipes.IPipe import IPipe
 from Application.UseCases.TestEntity.CreateTestEntity.ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
 from Domain.Errors.InterfaceNotImplementedError import InterfaceNotImplementedError
 
 from Framework.Infrastructure.Persistence import Persistence
 
-from Application.Infrastructure.Pipes.IInputPort import IInputPort
 from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPort import CreateTestEntityInputPort
 from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPortValidator import CreateTestEntityInputPortValidator
 from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInteractor import CreateTestEntityInteractor

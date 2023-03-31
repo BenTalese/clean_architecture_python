@@ -1,4 +1,4 @@
-from Application.Infrastructure.Pipes.IInputPort import IInputPort
+from clapy.pipes.IInputPort import IInputPort
 
 class GetTestEntityInputPort(IInputPort):
     def __init__(self, input: str):

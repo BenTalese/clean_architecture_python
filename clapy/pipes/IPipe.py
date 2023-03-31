@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic
-from Application.Infrastructure.Pipeline.PipePriority import PipePriority
 from Domain.Infrastructure.Generics import TInputPort, TOutputPort
+from clapy.pipes.PipePriority import PipePriority
 
 class IPipe(Generic[TInputPort, TOutputPort], ABC):
 
