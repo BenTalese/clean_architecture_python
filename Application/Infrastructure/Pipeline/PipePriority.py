@@ -1,5 +1,6 @@
 from enum import Enum
 
+# TODO: User should be able to define these
 class PipePriority(Enum):
     EntityExistenceChecker = 1
     InputPortValidator = 2
