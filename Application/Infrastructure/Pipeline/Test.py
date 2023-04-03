@@ -29,8 +29,8 @@ di_scan_locations = ["Application/UseCases", "Framework/Infrastructure"]
 
 _UseCaseScanLocations = ["Application/UseCases"]
 
-_ServiceProvider = ServiceProvider()
-ServiceProviderExtensions.ConfigureServices(_ServiceProvider, di_scan_locations, directory_exclusion_list, file_exclusion_list)
+_ServiceProvider = ServiceProvider(_UseCaseScanLocations, di_scan_locations, directory_exclusion_list, file_exclusion_list)
+#ServiceProviderExtensions.ConfigureServices(_ServiceProvider, _UseCaseScanLocations, di_scan_locations, directory_exclusion_list, file_exclusion_list)
 
 # TODO: Put pipes registry and factory inside invoker
 pipes_registry = PipelineScanner(_ServiceProvider, "Application/UseCases").scan() # TODO: There may be multiple scan locations
@@ -38,9 +38,9 @@ pipes_registry = PipelineScanner(_ServiceProvider, "Application/UseCases").scan(
 # Create the pipeline factory with the pipes registry
 factory = PipelineFactory(pipes_registry)
 
-#invoker = UseCaseInvoker(factory)
-invoker: UseCaseInvoker = ServiceProviderExtensions.GetService(_ServiceProvider, UseCaseInvoker)
-invoker.Configure(_UseCaseScanLocations)
+invoker = UseCaseInvoker(factory)
+#invoker: UseCaseInvoker = ServiceProviderExtensions.GetService(_ServiceProvider, UseCaseInvoker)
+#invoker.Configure(_UseCaseScanLocations)
 
 
 

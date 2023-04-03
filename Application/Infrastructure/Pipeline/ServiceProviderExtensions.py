@@ -3,7 +3,6 @@ import importlib
 import inspect
 import os
 import sys
-from Application.Infrastructure.Pipeline.ServiceProvider import ServiceProvider
 from Application.Infrastructure.Pipeline.INTERFACE_LOOKUP import INTERFACE_TO_CONCRETE
 from dependency_injector import providers
 from typing import List
@@ -13,7 +12,7 @@ sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastruct
 class ServiceProviderExtensions:
 
     @staticmethod
-    def GetService(serviceProvider: ServiceProvider, service: object) -> object:
+    def GetService(serviceProvider, service: object) -> object:
         try:
             return serviceProvider.providers.get(service.__name__)()
         except Exception as e:
@@ -21,7 +20,16 @@ class ServiceProviderExtensions:
 
     # TODO: Currently this registers everything as a factory (need option to do singleton)
     @staticmethod
-    def ConfigureServices(serviceProvider: ServiceProvider, scan_locations: List[str], directory_exclusion_list: List[str], file_exclusion_list: List[str]):
+    def ConfigureServices(
+        serviceProvider,
+        usecase_scan_locations: List[str],
+        scan_locations: List[str],
+        directory_exclusion_list: List[str],
+        file_exclusion_list: List[str]):
+
+        #Scan services
+        #Scan use cases
+
         for path in scan_locations:
             for root, dirs, files in os.walk(path):
                 dirs[:] = [d for d in dirs if d not in directory_exclusion_list]
@@ -60,12 +68,12 @@ class ServiceProviderExtensions:
                     
                     # For each dependency, check if the container has it registered and if not add it
                     for dependency_name, dependency_class in dependencies:
-                        if not hasattr(container, dependency_name):
-                            setattr(container, dependency_name, dependency_class)
+                        if not hasattr(serviceProvider, dependency_name):
+                            setattr(serviceProvider, dependency_name, dependency_class)
                     
                     # Create a dictionary of dependencies to add to the class being registered (gets dependencies from container attributes)
                     dependency_dict = {
-                        dependency_name: getattr(container, dependency_name) for dependency_name, dependency_class in dependencies
+                        dependency_name: getattr(serviceProvider, dependency_name) for dependency_name, dependency_class in dependencies
                     }
 
                     # TODO: This is repeating code
@@ -76,7 +84,7 @@ class ServiceProviderExtensions:
                             # Get concrete class and append to dependencies
                             concrete_class = [x[1] for x in INTERFACE_TO_CONCRETE if x[0] == module_class][0]
                             setattr(
-                                container,
+                                serviceProvider,
                                 module_name,
                                 providers.Factory(concrete_class, *dependency_dict.values())
                             )
@@ -84,7 +92,7 @@ class ServiceProviderExtensions:
                             raise LookupError(f"Interface '{module_class.__name__}' does not have a concrete class registered.")
                     else:
                         setattr(
-                            container,
+                            serviceProvider,
                             module_name,
                             providers.Factory(module_class, *dependency_dict.values())
                         )
