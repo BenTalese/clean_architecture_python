@@ -1,3 +1,32 @@
+from abc import ABC
+from enum import Enum
+import importlib
+import inspect
+import os
+import sys
+from Application.Infrastructure.Pipes.IBusinessRuleValidator import IBusinessRuleValidator
+from Application.Infrastructure.Pipes.IInteractor import IInteractor
+from Application.Services.IPersistence import IPersistence
+from Application.Services.ITestService import ITestService
+from Framework.Infrastructure.TestInfrastructure import TestInfrastructure
+from dependency_injector import containers, providers
+from dependency_injector.wiring import inject, Provide
+from pprint import pprint
+
+from typing import Dict, List, Type, Tuple
+from Application.Infrastructure.Pipes.IInputPortValidator import IInputPortValidator
+from Application.Infrastructure.Pipes.IPipe import IPipe
+from Application.UseCases.TestEntity.CreateTestEntity.ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
+from Domain.Errors.InterfaceNotImplementedError import InterfaceNotImplementedError
+
+from Framework.Infrastructure.Persistence import Persistence
+
+from Application.Infrastructure.Pipes.IInputPort import IInputPort
+from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPort import CreateTestEntityInputPort
+from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPortValidator import CreateTestEntityInputPortValidator
+from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInteractor import CreateTestEntityInteractor
+from Domain.Infrastructure.Generics import TInputPort, TInteractor, TOutputPort
+from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
 import os
 import sys
 
@@ -23,13 +52,29 @@ IServiceCollectionExtensions
             Validate()
 """
 
+INTERFACE_TO_CONCRETE = [
+    (IPersistence, Persistence),
+    (ITestService, TestInfrastructure)
+]
+
 directory_exclusion_list = ["__pycache__"]
 file_exclusion_list = ["__init__.py", "ICreateTestEntityOutputPort.py"]
 di_scan_locations = ["Application/UseCases", "Framework/Infrastructure"]
 
 _UseCaseScanLocations = ["Application/UseCases"]
 
-_ServiceProvider = ServiceProvider(_UseCaseScanLocations, di_scan_locations, directory_exclusion_list, file_exclusion_list)
+#TODO: Point out to users that they can put everything together their own way if they don't want to use the built-in wiring and service provider
+# For this i should define what they are required to do to hook things up and get it going
+# Will need to point out conventions that make this work out of the box, e.g.
+#   - DI_ for parameters
+#   - One class per file for DI
+#   - Class name matches module name
+#   - Interfaces must be registered first (idk if i like this one...)
+
+# TODO: Also, can demonstrate how you could have a "definitions.py" file with "ROOT_DIR = os.path.dirname(os.path.abspath(__file__))" that can be passed to scan everything...or maybe they can just pass "." ... not sure yet
+
+_ServiceProvider = ServiceProvider()
+ServiceProviderExtensions.RegisterDependencies(_ServiceProvider, di_scan_locations, directory_exclusion_list, file_exclusion_list, INTERFACE_TO_CONCRETE)
 #ServiceProviderExtensions.ConfigureServices(_ServiceProvider, _UseCaseScanLocations, di_scan_locations, directory_exclusion_list, file_exclusion_list)
 
 # TODO: Put pipes registry and factory inside invoker
@@ -41,6 +86,7 @@ factory = PipelineFactory(pipes_registry)
 invoker = UseCaseInvoker(factory)
 #invoker: UseCaseInvoker = ServiceProviderExtensions.GetService(_ServiceProvider, UseCaseInvoker)
 #invoker.Configure(_UseCaseScanLocations)
+
 
 
 
@@ -74,33 +120,6 @@ invoker.InvokeUseCase(invalid_input_port, output_port)
 
 
 
-from abc import ABC
-from enum import Enum
-import importlib
-import inspect
-import os
-import sys
-from Application.Infrastructure.Pipes.IBusinessRuleValidator import IBusinessRuleValidator
-from Application.Infrastructure.Pipes.IInteractor import IInteractor
-from Application.Services.IPersistence import IPersistence
-from dependency_injector import containers, providers
-from dependency_injector.wiring import inject, Provide
-from pprint import pprint
-
-from typing import Dict, List, Type, Tuple
-from Application.Infrastructure.Pipes.IInputPortValidator import IInputPortValidator
-from Application.Infrastructure.Pipes.IPipe import IPipe
-from Application.UseCases.TestEntity.CreateTestEntity.ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
-from Domain.Errors.InterfaceNotImplementedError import InterfaceNotImplementedError
-
-from Framework.Infrastructure.Persistence import Persistence
-
-from Application.Infrastructure.Pipes.IInputPort import IInputPort
-from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPort import CreateTestEntityInputPort
-from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPortValidator import CreateTestEntityInputPortValidator
-from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInteractor import CreateTestEntityInteractor
-from Domain.Infrastructure.Generics import TInputPort, TInteractor, TOutputPort
-from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
 
 """
 Options:

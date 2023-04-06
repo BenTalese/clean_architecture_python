@@ -14,6 +14,6 @@ class CreateTestEntityInteractor(IInteractor):
     def Execute(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort) -> bool:
         print("CreateTestEntityInteractor")
         x = TestEntity(id=uuid.uuid4(), testText=inputPort._input)
-        self._persistence.Add(self, tEntity=x)
+        self._persistence.Add(tEntity=x)
         outputPort.PresentTest(TestDto(id=uuid.uuid4(), testText=inputPort._input))
         return True
