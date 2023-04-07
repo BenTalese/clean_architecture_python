@@ -8,4 +8,4 @@ class IBusinessRuleValidator(IPipe, Generic[TInputPort, TOutputPort], ABC):
     
     @property
     def Priority(self) -> PipePriority:
-        return PipePriority.BusinessRuleValidator
+        return PipePriority.IBusinessRuleValidator

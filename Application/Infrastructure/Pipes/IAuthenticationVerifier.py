@@ -8,4 +8,4 @@ class IAuthenticationVerifier(IPipe, ABC):
     
     @property
     def Priority(self) -> PipePriority:
-        return PipePriority.Authentication
+        return PipePriority.IAuthenticationVerifier

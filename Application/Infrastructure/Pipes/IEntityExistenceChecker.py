@@ -8,4 +8,4 @@ class IEntityExistenceChecker(IPipe, Generic[TInputPort, TOutputPort], ABC):
     
     @property
     def Priority(self) -> PipePriority:
-        return PipePriority.EntityExistenceChecker
+        return PipePriority.IEntityExistenceChecker

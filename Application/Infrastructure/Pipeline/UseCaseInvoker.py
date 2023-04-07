@@ -10,7 +10,7 @@ class UseCaseInvoker:
 
     def InvokeUseCase(self, input_port: TInputPort, output_port: TOutputPort):
         pipeline = self.m_PipelineFactory.create_pipeline(input_port)
-        failures: List[str] = []
+        failures: List[str] = None
         pipeline_should_continue = True
         for pipe in pipeline:
             pipe: IPipe

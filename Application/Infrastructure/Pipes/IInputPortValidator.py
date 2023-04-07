@@ -8,4 +8,4 @@ class IInputPortValidator(IPipe, Generic[TInputPort, TOutputPort], ABC):
     
     @property
     def Priority(self) -> PipePriority:
-        return PipePriority.InputPortValidator
+        return PipePriority.IInputPortValidator

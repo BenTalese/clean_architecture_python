@@ -4,18 +4,32 @@ import inspect
 import os
 import re
 import sys
+from Application.Infrastructure.Pipeline.PipePriority import PipePriority
 from Application.Infrastructure.Pipeline.PipelineFactory import PipelineFactory
 from Application.Infrastructure.Pipeline.ServiceProvider import ServiceProvider
 from Application.Infrastructure.Pipeline.UseCaseInvoker import UseCaseInvoker
+from Application.Infrastructure.Pipes.IAuthenticationVerifier import IAuthenticationVerifier
+from Application.Infrastructure.Pipes.IAuthorisationEnforcer import IAuthorisationEnforcer
+from Application.Infrastructure.Pipes.IBusinessRuleValidator import IBusinessRuleValidator
+from Application.Infrastructure.Pipes.IEntityExistenceChecker import IEntityExistenceChecker
+from Application.Infrastructure.Pipes.IInputPortValidator import IInputPortValidator
+from Application.Infrastructure.Pipes.IInteractor import IInteractor
 from Application.Infrastructure.Pipes.IPipe import IPipe
 from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPort import CreateTestEntityInputPort
 from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInteractor import CreateTestEntityInteractor
 from Domain.Errors.InterfaceNotImplementedError import InterfaceNotImplementedError
 from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
 from dependency_injector import providers
-from typing import Dict, List, Tuple, Type
+from typing import Dict, List, Optional, Tuple, Type
 
-sys.path.append(os.getcwd()) #TODO: fixes python unable to see Application.Infrastructure.etc...
+#sys.path.append(os.getcwd()) #TODO: fixes python unable to see Application.Infrastructure.etc...
+
+
+#TODO: find a place for this to live
+DIR_EXCLUSIONS = [r"__pycache__"]
+
+FILE_EXCLUSIONS = [r".*__init__\.py", r".*OutputPort\.py"]
+
 
 class Wiring:
 
@@ -56,33 +70,34 @@ class Wiring:
     @staticmethod
     def RegisterDependencies(
         serviceProvider: ServiceProvider,
-        scanLocations: List[str],
-        directoryExclusionList: List[str],
-        fileExclusionList: List[str],
-        interfaceRegistry: List[Tuple[type, type]]):
+        interfaceRegistry: List[Tuple[type, type]],
+        dependencyScanLocations: Optional[List[str]] = ["."],
+        directoryExclusionPatterns: Optional[List[str]] = [],
+        fileExclusionPatterns: Optional[List[str]] = []):
 
-        for _Location in scanLocations:
+        directoryExclusionPatterns = directoryExclusionPatterns + DIR_EXCLUSIONS
+        fileExclusionPatterns = fileExclusionPatterns + FILE_EXCLUSIONS
+        #directoryExclusionPatterns.append(DIR_EXCLUSIONS)
+        #fileExclusionPatterns.append(FILE_EXCLUSIONS)
+
+        for _Location in dependencyScanLocations:
             for _Root, _Directories, _Files in os.walk(_Location):
-                _Directories[:] = [d for d in _Directories if d not in directoryExclusionList]
-                _Files[:] = [f for f in _Files if f not in fileExclusionList]
+                for _ExclusionPattern in directoryExclusionPatterns:
+                    _Directories[:] = [d for d in _Directories if not re.match(_ExclusionPattern, d)]
+
+                for _ExclusionPattern in fileExclusionPatterns:
+                    _Files[:] = [f for f in _Files if not re.match(_ExclusionPattern, f)]
+
                 for _File in _Files:
                     _ModuleName = _File[:-3]
-                    _Module = importlib.import_module(f"{_Root.replace('/', '.')}.{_ModuleName}", package=None)
+                    _Module = importlib.import_module(f"{_Root.replace('/', '.')}.{_ModuleName}")
                     _ModuleClass = getattr(_Module, _ModuleName, None)
 
                     if _ModuleClass is None:
                         raise Exception(f"""Could not find class for '{_ModuleName}'. Classes must be named the same as their module to be registered
                         in the dependency container. If you do not want this module to be scanned, add it to the file exclusions.""")
 
-                    _ClassToRegister = Wiring.__TryGetConcreteImplementation(_ModuleClass, interfaceRegistry)
-
-                    Wiring.RegisterDependency(serviceProvider, _ClassToRegister)
-
-        v = Wiring.GetService(serviceProvider, CreateTestEntityInteractor)
-        valid_input_port = CreateTestEntityInputPort("Hello")
-        output_port = CreateTestEntityPresenter()
-        v.Execute(valid_input_port, output_port)
-        vb = 0
+                    Wiring.RegisterDependency(serviceProvider, _ModuleClass, interfaceRegistry)
 
 
     @staticmethod
@@ -99,25 +114,27 @@ class Wiring:
 
 
     @staticmethod
-    def RegisterDependency(serviceProvider: ServiceProvider, classType: Type) -> object:
-        _DependencyName = Wiring.__GetServiceName(classType)
+    def RegisterDependency(serviceProvider: ServiceProvider, classType: Type, interfaceRegistry: List[Tuple[type, type]]) -> object:
+        _ClassToRegister = Wiring.__TryGetConcreteImplementation(classType, interfaceRegistry)
+
+        _DependencyName = Wiring.__GetServiceName(_ClassToRegister)
 
         if hasattr(serviceProvider, _DependencyName):
-            print(f"Skipped registering {_DependencyName} of type {classType} because container already has {_DependencyName} registered.")
+            print(f"Skipped registering {_DependencyName} of type {_ClassToRegister} because container already has {_DependencyName} registered.")
             return getattr(serviceProvider, _DependencyName)
 
-        _DependencyParametersFromConstructor = [_Param for _ParamName, _Param in inspect.signature(classType.__init__).parameters.items()
+        _DependencyParametersFromConstructor = [_Param for _ParamName, _Param in inspect.signature(_ClassToRegister.__init__).parameters.items()
                                             if _ParamName.startswith("DI_") and _Param.annotation != inspect.Parameter.empty]
 
         if not _DependencyParametersFromConstructor:
-            setattr(serviceProvider, _DependencyName, providers.Factory(classType))
+            setattr(serviceProvider, _DependencyName, providers.Factory(_ClassToRegister))
             return getattr(serviceProvider, _DependencyName)
 
         _SubDependencies = []
         for _Dependency in _DependencyParametersFromConstructor:
-            _SubDependencies.append(Wiring.RegisterDependency(serviceProvider, _Dependency.annotation))
+            _SubDependencies.append(Wiring.RegisterDependency(serviceProvider, _Dependency.annotation, interfaceRegistry))
 
-        setattr(serviceProvider, _DependencyName, providers.Factory(classType, *_SubDependencies))
+        setattr(serviceProvider, _DependencyName, providers.Factory(_ClassToRegister, *_SubDependencies))
 
         return getattr(serviceProvider, _DependencyName)
 
@@ -147,17 +164,23 @@ class Wiring:
     @staticmethod
     def ConstructUseCaseRegistry(
         serviceProvider: ServiceProvider,
-        useCaseLocations: List[str],
-        directoryExclusionList: List[str], # TODO: make exclusion lists optional
-        fileExclusionList: List[str]) -> Dict[str, List[Type[IPipe]]]:
+        useCaseLocations: Optional[List[str]] = ["."],
+        directoryExclusionPatterns: Optional[List[str]] = [],
+        fileExclusionPatterns: Optional[List[str]] = []) -> Dict[str, List[Type[IPipe]]]:
+
+        directoryExclusionPatterns = directoryExclusionPatterns + DIR_EXCLUSIONS
+        fileExclusionPatterns = fileExclusionPatterns + FILE_EXCLUSIONS
 
         _UseCaseRegistry = {}
 
         #TODO: this is repeating code "go through these locations and get the files excluding particular files/folders"
         for _Location in useCaseLocations:
             for _Root, _Directories, _Files in os.walk(_Location):
-                _Directories[:] = [d for d in _Directories if d not in directoryExclusionList]
-                _Files[:] = [f for f in _Files if f not in fileExclusionList]
+                for _ExclusionPattern in directoryExclusionPatterns:
+                    _Directories[:] = [d for d in _Directories if not re.match(_ExclusionPattern, d)]
+
+                for _ExclusionPattern in fileExclusionPatterns:
+                    _Files[:] = [f for f in _Files if not re.match(_ExclusionPattern, f)]
 
                 _Pipes = []
 
@@ -176,3 +199,24 @@ class Wiring:
                     #pipes_registry[os.path.basename(dirpath)] = {"interactor": CreateTestEntityInteractor(Persistence()), "pipes": pipes}
 
         return _UseCaseRegistry
+
+
+    @staticmethod
+    def SetPipePriority(**kwargs):
+        for key, value in Wiring.__GetDefaultPipePriorities().items():
+            setattr(PipePriority, key, value)
+            
+        for key, value in kwargs.items():
+            setattr(PipePriority, key, value)
+
+
+    @staticmethod
+    def __GetDefaultPipePriorities():
+        return {
+            f'{IAuthenticationVerifier.__name__}': 1,
+            f'{IEntityExistenceChecker.__name__}': 2,
+            f'{IAuthorisationEnforcer.__name__}': 3,
+            f'{IBusinessRuleValidator.__name__}': 4,
+            f'{IInputPortValidator.__name__}': 5,
+            f'{IInteractor.__name__}': 6
+        }

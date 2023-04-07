@@ -12,7 +12,7 @@ class CreateTestEntityPresenter(BasePresenter, ICreateTestEntityOutputPort):
         print("Wow it worked, see!!  :  " + dto._testText)
     
     def PresentValidationFailure(self, validationFailure: TValidationFailure) -> bool:
-        super().PresentValidationFailure(validationFailure)
+        print(validationFailure)
 
     #def PresentValidationFailures(self, failures: List[str]) -> None:
     #    print("Oh no, something went wrongsies:" + ', '.join(failures))
