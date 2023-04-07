@@ -31,9 +31,7 @@ import os
 import sys
 
 from Application.Infrastructure.Pipeline.ServiceProvider import ServiceProvider
-from Application.Infrastructure.Pipeline.ServiceProviderExtensions import ServiceProviderExtensions
-from Application.Infrastructure.Pipeline.PipelineFactory import PipelineFactory
-from Application.Infrastructure.Pipeline.PipelineScanner import PipelineScanner
+from Application.Infrastructure.Pipeline.Wiring import Wiring
 from Application.Infrastructure.Pipeline.UseCaseInvoker import UseCaseInvoker
 from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPort import CreateTestEntityInputPort
 from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
@@ -74,17 +72,12 @@ _UseCaseScanLocations = ["Application/UseCases"]
 # TODO: Also, can demonstrate how you could have a "definitions.py" file with "ROOT_DIR = os.path.dirname(os.path.abspath(__file__))" that can be passed to scan everything...or maybe they can just pass "." ... not sure yet
 
 _ServiceProvider = ServiceProvider()
-ServiceProviderExtensions.RegisterDependencies(_ServiceProvider, di_scan_locations, directory_exclusion_list, file_exclusion_list, INTERFACE_TO_CONCRETE)
+Wiring.RegisterDependencies(_ServiceProvider, di_scan_locations, directory_exclusion_list, file_exclusion_list, INTERFACE_TO_CONCRETE)
+_UseCaseRegistry = Wiring.ConstructUseCaseRegistry(_ServiceProvider, _UseCaseScanLocations, directory_exclusion_list, file_exclusion_list)
+Wiring.RegisterPipeline(_ServiceProvider, _UseCaseRegistry)
+invoker: UseCaseInvoker = Wiring.GetService(_ServiceProvider, UseCaseInvoker)
 #ServiceProviderExtensions.ConfigureServices(_ServiceProvider, _UseCaseScanLocations, di_scan_locations, directory_exclusion_list, file_exclusion_list)
 
-# TODO: Put pipes registry and factory inside invoker
-pipes_registry = PipelineScanner(_ServiceProvider, "Application/UseCases").scan() # TODO: There may be multiple scan locations
-
-# Create the pipeline factory with the pipes registry
-factory = PipelineFactory(pipes_registry)
-
-invoker = UseCaseInvoker(factory)
-#invoker: UseCaseInvoker = ServiceProviderExtensions.GetService(_ServiceProvider, UseCaseInvoker)
 #invoker.Configure(_UseCaseScanLocations)
 
 

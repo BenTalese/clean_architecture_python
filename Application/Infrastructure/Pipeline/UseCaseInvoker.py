@@ -1,20 +1,12 @@
 from typing import List
 from Application.Infrastructure.Pipeline.PipelineFactory import PipelineFactory
-from Application.Infrastructure.Pipeline.PipelineScanner import PipelineScanner
-from Application.Infrastructure.Pipeline.ServiceProvider import ServiceProvider
-from Application.Infrastructure.Pipeline.ServiceProviderExtensions import ServiceProviderExtensions
 from Application.Infrastructure.Pipes.IInteractor import IInteractor
 from Application.Infrastructure.Pipes.IPipe import IPipe
 from Domain.Infrastructure.Generics import TInputPort, TOutputPort
 
 class UseCaseInvoker:
-    def __init__(self, serviceProvider: ServiceProvider):
-        self.m_ServiceProvider = serviceProvider if serviceProvider is not None else ValueError(f"'{serviceProvider=}' cannot be None.")
-        self.m_PipelineFactory: PipelineFactory = ServiceProviderExtensions.GetService(self.m_ServiceProvider, PipelineFactory) # this feels really stupid
-        self.m_PipelineScanner: PipelineScanner = ServiceProviderExtensions.GetService(self.m_ServiceProvider, PipelineScanner)
-
-    def Configure(self, useCaseScanLocations: List[str]):
-        pass
+    def __init__(self, pipelineFactory: PipelineFactory):
+        self.m_PipelineFactory = pipelineFactory if pipelineFactory is not None else ValueError(f"'{pipelineFactory=}' cannot be None.")
 
     def InvokeUseCase(self, input_port: TInputPort, output_port: TOutputPort):
         pipeline = self.m_PipelineFactory.create_pipeline(input_port)

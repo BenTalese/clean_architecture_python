@@ -1,6 +1,3 @@
-
-
-
 class PipePriority:
     __initialized = False
 
