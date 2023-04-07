@@ -53,7 +53,7 @@ class ServiceProviderExtensions: # TODO: Rename to Wiring or something
         scanLocations: List[str],
         directoryExclusionList: List[str],
         fileExclusionList: List[str],
-        interfaceRegistry: List[Tuple[type, type]]): #TODO: type hint this
+        interfaceRegistry: List[Tuple[type, type]]):
 
         for _Location in scanLocations:
             for _Root, _Directories, _Files in os.walk(_Location):
@@ -68,25 +68,27 @@ class ServiceProviderExtensions: # TODO: Rename to Wiring or something
                         raise Exception(f"""Could not find class for '{_ModuleName}'. Classes must be named the same as their module to be registered 
                         in the dependency container. If you do not want this module to be scanned, add it to the file exclusions.""")
 
-                    ServiceProviderExtensions.RegisterDependency(serviceProvider, _ModuleClass, interfaceRegistry)
+                    _ClassToRegister = ServiceProviderExtensions.__TryGetConcreteImplementation(_ModuleClass, interfaceRegistry)
+
+                    ServiceProviderExtensions.RegisterDependency(serviceProvider, _ClassToRegister)
 
 
-    #ImplementationProvider class?
+    #TODO: ImplementationProvider class?
     #Could have CheckIfInterface()?
     @staticmethod
-    def __TryGetConcreteImplementation():
-        pass
-
-    @staticmethod
-    def RegisterDependency(serviceProvider: ServiceProvider, classType: Type, interfaceRegistry: List[Tuple[type, type]]):
+    def __TryGetConcreteImplementation(classType: Type, interfaceRegistry: List[Tuple[type, type]]) -> object: #TODO: Investgate if this is the best...this implies what is being sent in is an interface or should be an interface
         _IsInterface = ABC in classType.__bases__
 
         if _IsInterface:
             if classType not in [interfaceConcretePair[0] for interfaceConcretePair in interfaceRegistry]:
                 raise LookupError(f"Interface '{classType.__name__}' does not have a concrete class registered.")
 
-            classType = [interfaceConcretePair[1] for interfaceConcretePair in interfaceRegistry if interfaceConcretePair[0] == classType][0]
+            return [interfaceConcretePair[1] for interfaceConcretePair in interfaceRegistry if interfaceConcretePair[0] == classType][0]
+        
+        return classType
 
+    @staticmethod
+    def RegisterDependency(serviceProvider: ServiceProvider, classType: Type) -> object:
         _DependencyName = ServiceProviderExtensions.__GetServiceName(classType)
 
         if hasattr(serviceProvider, _DependencyName):
@@ -102,7 +104,7 @@ class ServiceProviderExtensions: # TODO: Rename to Wiring or something
 
         _SubDependencies = []
         for _Dependency in _DependencyParametersFromConstructor:
-            _SubDependencies.append(ServiceProviderExtensions.RegisterDependency(serviceProvider, _Dependency.annotation, interfaceRegistry))
+            _SubDependencies.append(ServiceProviderExtensions.RegisterDependency(serviceProvider, _Dependency.annotation))
 
         setattr(serviceProvider, _DependencyName, providers.Factory(classType, *_SubDependencies))
 
