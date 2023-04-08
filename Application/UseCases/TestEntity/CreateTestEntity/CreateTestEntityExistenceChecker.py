@@ -7,4 +7,4 @@ class CreateTestEntityExistenceChecker(IEntityExistenceChecker[CreateTestEntityI
 
     def Execute(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort) -> None:
 
-        self.m_CanInvokeNextPipe = False
+        self.m_CanInvokeNextPipe = True
