@@ -9,7 +9,7 @@ class CreateTestEntityInputPortValidator(IInputPortValidator[CreateTestEntityInp
     def execute(self, input_port: CreateTestEntityInputPort, output_port: ICreateTestEntityOutputPort) -> Callable | None:
         _Failures = []
 
-        if input_port._input != "Hello":
+        if input_port.input != "Hello":
             _Failures.append("Text was not 'Hello'.")
             _Failures.append("Another message for testing.")
             return lambda: output_port.present_validation_failure(_Failures)

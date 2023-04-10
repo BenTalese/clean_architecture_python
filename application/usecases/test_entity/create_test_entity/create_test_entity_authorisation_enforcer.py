@@ -8,4 +8,5 @@ from .icreate_test_entity_output_port import ICreateTestEntityOutputPort
 class CreateTestEntityAuthorisationEnforcer(IAuthorisationEnforcer[CreateTestEntityInputPort, ICreateTestEntityOutputPort]):
 
     def execute(self, input_port: CreateTestEntityInputPort, output_port: ICreateTestEntityOutputPort) -> Callable | None:
-        return lambda: output_port.present_unauthorised("TEST LAMBDA")
+        pass
+        #return lambda: output_port.present_unauthorised("TEST LAMBDA")

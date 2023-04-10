@@ -13,7 +13,6 @@ class CreateTestEntityInteractor(IInteractor):
         self._persistence = DI_persistence
     
     def execute(self, input_port: CreateTestEntityInputPort, output_port: ICreateTestEntityOutputPort) -> Callable | None:
-        x = TestEntity(id=uuid.uuid4(), testText=input_port.input)
+        x = TestEntity(id=uuid.uuid4(), test_text=input_port.input)
         self._persistence.add(entity=x)
-        output_port.present_test(TestDto(id=uuid.uuid4(), testText=input_port.input))
-        return True
+        return lambda: output_port.present_test(TestDto(id=uuid.uuid4(), test_text=input_port.input))
