@@ -1,4 +1,3 @@
-
 from application.infrastructure.pipeline.ipipeline_factory import IPipelineFactory
 from application.infrastructure.pipeline.iusecase_invoker import IUseCaseInvoker
 from application.infrastructure.pipes.iinteractor import IInteractor
@@ -37,6 +36,23 @@ class UseCaseInvoker(IUseCaseInvoker):
 
             _Pipe = _Pipeline.pop(0)
 
+            _PipelineResult = _Pipe.execute(input_port, output_port)
+
+        if _PipelineResult is not None: # TODO: should it just execute anyways?...
+            _PipelineResult()
+
+
+        
+
+    """
+    def invoke_usecase_OLD(self, input_port: TInputPort, output_port: TOutputPort) -> None:
+        _Pipeline = self._pipeline_factory.create_pipeline(input_port)
+
+        _PipelineResult = None
+        while _PipelineResult is None:
+
+            _Pipe = _Pipeline.pop(0)
+
             if not isinstance(_Pipe, IInteractor):
                 _PipelineResult = _Pipe.execute(input_port, output_port)
 
@@ -46,9 +62,7 @@ class UseCaseInvoker(IUseCaseInvoker):
             else:
                 _Pipe.execute(input_port, output_port)()
 
-        
 
-    """
     def InvokeUseCaseTest(self, inputPort: TInputPort, outputPort: TOutputPort):
         _Pipeline = self.m_PipelineFactory.create_pipeline(inputPort)
         _PipelineShouldContinue = True
