@@ -17,10 +17,4 @@ class PipelineFactory(IPipelineFactory):
         
         _Pipes = self._usecaseRegistry[_UsecaseKey]["pipes"]
         
-        #TODO: This feels like a weird check to have...
-        if any(_Pipe is None for _Pipe in _Pipes):
-            raise Exception(f"One of the pipes for the use case '{_UsecaseKey}' is not configured correctly.")
-        
-        _SortedPipes = sorted(_Pipes, key=lambda _Pipe: _Pipe.priority)
-        
-        return _SortedPipes
+        return sorted(_Pipes, key=lambda _Pipe: _Pipe.priority)
