@@ -1,25 +1,26 @@
 from typing import Dict, List, Type
-from Application.Infrastructure.Pipeline.IPipelineFactory import IPipelineFactory
-from Application.Infrastructure.Pipes.IPipe import IPipe
-from Domain.Infrastructure.Generics import TInputPort
+from application.infrastructure.pipeline.ipipeline_factory import IPipelineFactory
+from application.infrastructure.pipes.ipipe import IPipe
+from domain.infrastructure.generics import TInputPort
 
 class PipelineFactory(IPipelineFactory):
     
-    def __init__(self, useCaseRegistry: Dict[str, List[Type[IPipe]]]):
-        self.__useCaseRegistry = useCaseRegistry if useCaseRegistry is not None else ValueError(f"'{useCaseRegistry=}' cannot be None.")
+    def __init__(self, usecase_registry: Dict[str, List[Type[IPipe]]]):
+        self._usecaseRegistry = usecase_registry if usecase_registry is not None else ValueError(f"'{usecase_registry=}' cannot be None.")
 
 
-    def CreatePipeline(self, inputPort: TInputPort) -> List[Type[IPipe]]:
-        _UseCaseKey = inputPort.__module__.rsplit(".", 1)[0]
+    def create_pipeline(self, input_port: TInputPort) -> List[Type[IPipe]]:
+        _UsecaseKey = input_port.__module__.rsplit(".", 1)[0]
 
-        if _UseCaseKey not in self.__useCaseRegistry:
-            raise KeyError(f"Could not find '{inputPort}' in the pipeline registry.")
+        if _UsecaseKey not in self._usecaseRegistry:
+            raise KeyError(f"Could not find '{input_port}' in the pipeline registry.")
         
-        _Pipes = self.__useCaseRegistry[_UseCaseKey]["pipes"]
+        _Pipes = self._usecaseRegistry[_UsecaseKey]["pipes"]
         
         #TODO: This feels like a weird check to have...
         if any(_Pipe is None for _Pipe in _Pipes):
-            raise Exception(f"One of the pipes for the use case '{_UseCaseKey}' is not configured correctly.")
+            raise Exception(f"One of the pipes for the use case '{_UsecaseKey}' is not configured correctly.")
         
-        _SortedPipes = sorted(_Pipes, key=lambda _Pipe: _Pipe.Priority)
+        _SortedPipes = sorted(_Pipes, key=lambda _Pipe: _Pipe.priority)
+        
         return _SortedPipes

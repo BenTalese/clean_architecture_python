@@ -4,8 +4,8 @@ TEntity = TypeVar("TEntity")
 
 class Persistence2():
 
-    def Add(tEntity: TEntity) -> None:
+    def add(entity: TEntity) -> None:
         print(3)
 
-    def Remove(tEntity: TEntity) -> None:
+    def remove(entity: TEntity) -> None:
         print(4)

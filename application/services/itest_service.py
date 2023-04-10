@@ -1,17 +1,17 @@
 from abc import ABC, abstractmethod
+from domain.infrastructure.generics import TEntity
 
-from Domain.Infrastructure.Generics import TEntity
 
 class ITestService(ABC):
 
     @abstractmethod
-    def Add(self, tEntity: TEntity) -> None:
+    def add(self, entity: TEntity) -> None:
         pass
 
     @abstractmethod
-    def Remove(self, tEntity: TEntity) -> None:
+    def remove(self, entity: TEntity) -> None:
         pass
 
     @abstractmethod
-    def SaveChanges(self) -> None:
+    def save_changes(self) -> None:
         pass

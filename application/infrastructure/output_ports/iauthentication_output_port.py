@@ -3,6 +3,6 @@ from abc import ABC, abstractmethod
 class IAuthenticationOutputPort(ABC):
     
     @abstractmethod
-    def PresentUnauthenticated() -> None:
+    def present_unauthenticated() -> None:
         pass
     

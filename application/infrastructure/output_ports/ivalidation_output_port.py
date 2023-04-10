@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Generic
-from Domain.Infrastructure.Generics import TValidationFailure
+from domain.infrastructure.generics import TValidationFailure
 
 class IValidationOutputPort(Generic[TValidationFailure], ABC):
     
     @abstractmethod
-    def PresentValidationFailure(self, validationFailure: TValidationFailure) -> None:
+    def present_validation_failure(self, validation_failure: TValidationFailure) -> None:
         pass
     

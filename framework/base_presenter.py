@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from Application.Infrastructure.OutputPorts.IValidationOutputPort import IValidationOutputPort
-from Domain.Infrastructure.Generics import TValidationFailure
+from application.infrastructure.output_ports.ivalidation_output_port import IValidationOutputPort
+from domain.infrastructure.generics import TValidationFailure
 
 
 class BasePresenter(IValidationOutputPort, ABC):
     
     @abstractmethod
-    def PresentValidationFailure(self, validationFailure: TValidationFailure) -> bool:
+    def present_validation_failure(self, validationFailure: TValidationFailure) -> bool:
         print("Error!")
         

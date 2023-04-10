@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import List, Type
-from Application.Infrastructure.Pipes.IPipe import IPipe
-from Domain.Infrastructure.Generics import TInputPort
+from application.infrastructure.pipes.ipipe import IPipe
+from domain.infrastructure.generics import TInputPort
 
 class IPipelineFactory(ABC):
 
     @abstractmethod
-    def CreatePipeline(self, inputPort: TInputPort) -> List[Type[IPipe]]:
+    def create_pipeline(self, input_port: TInputPort) -> List[Type[IPipe]]:
         pass

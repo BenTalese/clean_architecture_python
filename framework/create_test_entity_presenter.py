@@ -1,24 +1,19 @@
-from typing import List
-
-from Application.Dtos.TestDto import TestDto
-from Application.UseCases.TestEntity.CreateTestEntity.ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
-from Domain.Infrastructure.Generics import TAuthorisationFailure, TValidationFailure
-from Framework.BasePresenter import BasePresenter
+from application.dtos.test_dto import TestDto
+from application.usecases.test_entity.create_test_entity.icreate_test_entity_output_port import ICreateTestEntityOutputPort
+from domain.infrastructure.generics import TAuthorisationFailure, TValidationFailure
+from framework.base_presenter import BasePresenter
 
 
 class CreateTestEntityPresenter(BasePresenter, ICreateTestEntityOutputPort):
 
-    def PresentTest(self, dto: TestDto) -> None:
-        print("Wow it worked, see!!  :  " + dto._testText)
+    def present_test(self, dto: TestDto) -> None:
+        print("Wow it worked, see!!  :  " + dto.test_text)
     
-    def PresentValidationFailure(self, validationFailure: TValidationFailure) -> bool:
-        print(validationFailure)
+    def present_validation_failure(self, validation_failure: TValidationFailure) -> bool:
+        print(validation_failure)
 
-    def PresentFailures(self, validationFailures):
-        print(validationFailures)
-
-    def PresentUnauthorised(self, authorisationFailure: TAuthorisationFailure) -> None:
-        print(authorisationFailure)
+    def present_unauthorised(self, authorisation_failure: TAuthorisationFailure) -> None:
+        print(authorisation_failure)
 
     #def PresentValidationFailures(self, failures: List[str]) -> None:
     #    print("Oh no, something went wrongsies:" + ', '.join(failures))

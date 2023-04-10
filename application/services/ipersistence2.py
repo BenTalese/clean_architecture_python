@@ -4,8 +4,8 @@ TEntity = TypeVar("TEntity")
 
 class IPersistence2(Protocol):
 
-    def Add(tEntity: TEntity) -> None:
+    def add(entity: TEntity) -> None:
         pass
 
-    def Remove(tEntity: TEntity) -> None:
+    def remove(entity: TEntity) -> None:
         pass

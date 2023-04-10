@@ -1,16 +1,3 @@
-from Application.Services.IPersistence import IPersistence
-from Application.Services.ITestService import ITestService
-from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInteractor import CreateTestEntityInteractor
-from Framework.Infrastructure.TestInfrastructure import TestInfrastructure
-from Application.UseCases.TestEntity.CreateTestEntity.ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
-from Framework.Infrastructure.Persistence import Persistence
-from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPort import CreateTestEntityInputPort
-from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
-from Application.Infrastructure.Pipeline.ServiceProvider import ServiceProvider
-from Application.Infrastructure.Pipeline.Wiring import Wiring
-from Application.Infrastructure.Pipeline.UseCaseInvoker import UseCaseInvoker
-from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPort import CreateTestEntityInputPort
-from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
 
 #sys.path.append(os.getcwd()) #fixes python unable to see Application.Infrastructure.etc...
 
@@ -34,38 +21,52 @@ from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
 
 
 
+from application.infrastructure.pipeline.iusecase_invoker import IUseCaseInvoker
+from application.infrastructure.pipeline.service_provider import ServiceProvider
+from application.infrastructure.pipeline.wiring import Wiring
+from application.services.ipersistence import IPersistence
+from application.services.itest_service import ITestService
+from application.usecases.test_entity.create_test_entity.create_test_entity_input_port import CreateTestEntityInputPort
+from application.usecases.test_entity.create_test_entity.icreate_test_entity_output_port import ICreateTestEntityOutputPort
+from framework.create_test_entity_presenter import CreateTestEntityPresenter
+from framework.infrastructure.persistence import Persistence
+from framework.infrastructure.test_infrastructure import TestInfrastructure
+
+
 INTERFACE_TO_CONCRETE = [
     (IPersistence, Persistence),
     (ITestService, TestInfrastructure)
 ]
 
-di_scan_locations = ["Application/UseCases", "Framework/Infrastructure"]
+_DIScanLocations = ["application/usecases", "framework/infrastructure"]
 
-_UseCaseScanLocations = ["Application/UseCases"]
+_UsecaseScanLocations = ["application/usecases"]
 
 _ServiceProvider = ServiceProvider()
 
-Wiring.SetPipePriority(IAuthorisationEnforcer=0, IAuthenticationVerifier=3)
-Wiring.RegisterDependencies(_ServiceProvider, INTERFACE_TO_CONCRETE, di_scan_locations)
-Wiring.ConstructUseCaseInvoker(_ServiceProvider, _UseCaseScanLocations)
+Wiring.set_pipe_priority(IAuthorisationEnforcer=0, IAuthenticationVerifier=3)
+Wiring.register_dependencies(_ServiceProvider, INTERFACE_TO_CONCRETE, _DIScanLocations)
+x = Wiring.construct_usecase_invoker(_ServiceProvider, _UsecaseScanLocations)
 
-_Invoker: UseCaseInvoker = Wiring.GetService(_ServiceProvider, UseCaseInvoker)
+_Invoker: IUseCaseInvoker = Wiring.get_service(_ServiceProvider, IUseCaseInvoker)
 
 #_Invoker.m_ContinueOnFailures = True
 
-invalid_input_port = CreateTestEntityInputPort("test")
-valid_input_port = CreateTestEntityInputPort("Hello")
-output_port = CreateTestEntityPresenter()
+_InvalidInputPort = CreateTestEntityInputPort("test")
+_ValidInputPort = CreateTestEntityInputPort("Hello")
+_OutputPort = CreateTestEntityPresenter()
 
-_Invoker.InvokeUseCase(valid_input_port, output_port)
+_Invoker.invoke_usecase(_ValidInputPort, _OutputPort)
 
 
 class TestController():
-    def __init__(self, useCaseInvoker: UseCaseInvoker):
-        self._useCaseInvoker = useCaseInvoker
 
-    def create_test_entity(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort):
-        self._useCaseInvoker.InvokeUseCase(inputPort, outputPort)
+    def __init__(self, usecase_invoker: IUseCaseInvoker):
+        self._usecase_invoker = usecase_invoker if usecase_invoker is not None else ValueError(f"'{usecase_invoker=}' cannot be None.")
+
+
+    def create_test_entity(self, input_port: CreateTestEntityInputPort, output_port: ICreateTestEntityOutputPort):
+        self._usecase_invoker.invoke_use_case(input_port, output_port)
 
 
 

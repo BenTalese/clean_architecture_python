@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
-from Domain.Infrastructure.Generics import TInputPort, TOutputPort
+from domain.infrastructure.generics import TInputPort, TOutputPort
 
 class IUseCaseInvoker(ABC):
 
     @abstractmethod
-    def CanInvokeUseCase(self, inputPort: TInputPort, outputPort: TOutputPort) -> bool:
+    def can_invoke_usecase(self, input_port: TInputPort, output_port: TOutputPort) -> bool:
         pass
 
 
     @abstractmethod
-    def InvokeUseCase(self, inputPort: TInputPort, outputPort: TOutputPort) -> None:
+    def invoke_usecase(self, input_port: TInputPort, output_port: TOutputPort) -> None:
         pass

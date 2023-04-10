@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from Application.Dtos.TestDto import TestDto
-from Application.Infrastructure.OutputPorts.IValidationOutputPort import IValidationOutputPort
-from Application.Infrastructure.OutputPorts.IAuthorisationOutputPort import IAuthorisationOutputPort
+from application.dtos.test_dto import TestDto
+from application.infrastructure.output_ports.iauthorisation_output_port import IAuthorisationOutputPort
+from application.infrastructure.output_ports.ivalidation_output_port import IValidationOutputPort
 
 class ICreateTestEntityOutputPort(IAuthorisationOutputPort, IValidationOutputPort, ABC):
     
     @abstractmethod
-    def PresentTest(self, dto: TestDto) -> None:
+    def present_test(self, dto: TestDto) -> None:
         pass

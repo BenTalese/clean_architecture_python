@@ -1,11 +1,11 @@
 
 from abc import ABC
-from Application.Infrastructure.Pipeline.PipePriority import PipePriority
-from Application.Infrastructure.Pipes.IPipe import IPipe
+from application.infrastructure.pipeline.pipe_priority import PipePriority
+from application.infrastructure.pipes.ipipe import IPipe
 
 
 class IAuthenticationVerifier(IPipe, ABC):
     
     @property
-    def Priority(self) -> PipePriority:
+    def priority(self) -> PipePriority:
         return PipePriority.IAuthenticationVerifier

@@ -1,36 +1,18 @@
-from typing import List
-from Application.Infrastructure.Pipeline.IPipelineFactory import IPipelineFactory
-from Application.Infrastructure.Pipeline.IUseCaseInvoker import IUseCaseInvoker
-from Application.Infrastructure.Pipes.IInteractor import IInteractor
-from Application.Infrastructure.Pipes.IPipe import IPipe
-from Domain.Infrastructure.Generics import TInputPort, TOutputPort
+
+from application.infrastructure.pipeline.ipipeline_factory import IPipelineFactory
+from application.infrastructure.pipeline.iusecase_invoker import IUseCaseInvoker
+from application.infrastructure.pipes.iinteractor import IInteractor
+from domain.infrastructure.generics import TInputPort, TOutputPort
+
 
 class UseCaseInvoker(IUseCaseInvoker):
 
-    def __init__(self, pipelineFactory: IPipelineFactory):
-        self.__pipelineFactory = pipelineFactory if pipelineFactory is not None else ValueError(f"'{pipelineFactory=}' cannot be None.")
+    def __init__(self, pipeline_factory: IPipelineFactory):
+        self._pipeline_factory = pipeline_factory if pipeline_factory is not None else ValueError(f"'{pipeline_factory=}' cannot be None.")
 
 
-    def InvokeUseCase(self, inputPort: TInputPort, outputPort: TOutputPort) -> None:
-        _Pipeline = self.__pipelineFactory.CreatePipeline(inputPort)
-
-        _PipelineResult = None
-        while _PipelineResult is None:
-
-            _Pipe = _Pipeline.pop(0)
-
-            if not isinstance(_Pipe, IInteractor):
-                _PipelineResult = _Pipe.Execute(inputPort, outputPort)
-
-                if _PipelineResult is not None:
-                    _PipelineResult()
-
-            else:
-                _Pipe.Execute(inputPort, outputPort)()
-
-
-    def can_invoke_usecase(self, inputPort: TInputPort, outputPort: TOutputPort) -> bool:
-        _Pipeline = self.__pipelineFactory.CreatePipeline(inputPort)
+    def can_invoke_usecase(self, input_port: TInputPort, output_port: TOutputPort) -> bool:
+        _Pipeline = self._pipeline_factory.create_pipeline(input_port)
 
         _PipelineResult = None
         while _PipelineResult is None:
@@ -38,13 +20,32 @@ class UseCaseInvoker(IUseCaseInvoker):
             _Pipe = _Pipeline.pop(0)
 
             if not isinstance(_Pipe, IInteractor):
-                _PipelineResult = _Pipe.Execute(inputPort, outputPort)
+                _PipelineResult = _Pipe.execute(input_port, output_port)
 
                 if _PipelineResult is not None:
                     return False
 
             else:
                 return True
+
+
+    def invoke_usecase(self, input_port: TInputPort, output_port: TOutputPort) -> None:
+        _Pipeline = self._pipeline_factory.create_pipeline(input_port)
+
+        _PipelineResult = None
+        while _PipelineResult is None:
+
+            _Pipe = _Pipeline.pop(0)
+
+            if not isinstance(_Pipe, IInteractor):
+                _PipelineResult = _Pipe.execute(input_port, output_port)
+
+                if _PipelineResult is not None:
+                    _PipelineResult()
+
+            else:
+                _Pipe.execute(input_port, output_port)()
+
         
 
     """

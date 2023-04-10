@@ -1,13 +1,13 @@
-from Application.Services.ITestService import ITestService
-from Domain.Infrastructure.Generics import TEntity
+from application.services.itest_service import ITestService
+from domain.infrastructure.generics import TEntity
 
 
 class TestInfrastructure(ITestService):
-    def Add(self, tEntity: TEntity) -> None:
+    def add(self, entity: TEntity) -> None:
         print("Added")
 
-    def Remove(self, tEntity: TEntity) -> None:
+    def remove(self, entity: TEntity) -> None:
         print("Removed")
 
-    def SaveChanges(self) -> None:
+    def save_changes(self) -> None:
         print("Saved")
