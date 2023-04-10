@@ -11,7 +11,7 @@ class CreateTestEntityInteractor(IInteractor):
     def __init__(self, DI_persistence: IPersistence):
         self._persistence = DI_persistence
     
-    def Execute(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort) -> bool:
+    def Execute(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort):
         print("CreateTestEntityInteractor")
         x = TestEntity(id=uuid.uuid4(), testText=inputPort._input)
         self._persistence.Add(tEntity=x)

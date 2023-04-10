@@ -1,7 +1,6 @@
-import os
-import sys
 from Application.Services.IPersistence import IPersistence
 from Application.Services.ITestService import ITestService
+from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInteractor import CreateTestEntityInteractor
 from Framework.Infrastructure.TestInfrastructure import TestInfrastructure
 from Application.UseCases.TestEntity.CreateTestEntity.ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
 from Framework.Infrastructure.Persistence import Persistence
@@ -22,11 +21,17 @@ from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
 #   - One class per file for DI
 #   - Class name matches module name
 #   - Interfaces must be registered first (idk if i like this one...)
+#   - Possibly DI_S_ for singleton...not sure
 
 # TODO: Pipes folder should be under services...I think, maybe also OutputPorts?
 # TODO: Tell user they must overwrite pipe priority in use before assigning that priority to another pipe
 # TODO: Also, can demonstrate how you could have a "definitions.py" file with "ROOT_DIR = os.path.dirname(os.path.abspath(__file__))" that can be passed to scan everything...or maybe they can just pass "." ... not sure yet
 # TODO: Get rid of all the printing to the console...
+# TODO: Add a Wiring.RegisterService method that the user can use to add a service (or not, don't recreate a DI container)
+
+# TODO: Idea i had is this can be the Clapy-Auto version, but Clapy should be changed so it doesn't auto scan for things, and to resolve services, instead of DI'ing the pipe, use the "GetService()" method in the constructor
+# IMPORTANT: Don't do a separate package, just provide building blocks + auto features
+
 
 
 INTERFACE_TO_CONCRETE = [
@@ -42,24 +47,24 @@ _ServiceProvider = ServiceProvider()
 
 Wiring.SetPipePriority(IAuthorisationEnforcer=0, IAuthenticationVerifier=3)
 Wiring.RegisterDependencies(_ServiceProvider, INTERFACE_TO_CONCRETE, di_scan_locations)
-_UseCaseRegistry = Wiring.ConstructUseCaseRegistry(_ServiceProvider, _UseCaseScanLocations)
-Wiring.RegisterPipeline(_ServiceProvider, _UseCaseRegistry)
+Wiring.ConstructUseCaseInvoker(_ServiceProvider, _UseCaseScanLocations)
+
 _Invoker: UseCaseInvoker = Wiring.GetService(_ServiceProvider, UseCaseInvoker)
 
+#_Invoker.m_ContinueOnFailures = True
 
-# Create the input and output ports
 invalid_input_port = CreateTestEntityInputPort("test")
 valid_input_port = CreateTestEntityInputPort("Hello")
 output_port = CreateTestEntityPresenter()
 
-_Invoker.InvokeUseCase(invalid_input_port, output_port)
+_Invoker.InvokeUseCase(valid_input_port, output_port)
 
 
 class TestController():
     def __init__(self, useCaseInvoker: UseCaseInvoker):
         self._useCaseInvoker = useCaseInvoker
 
-    def CreateTestEntity(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort):
+    def create_test_entity(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort):
         self._useCaseInvoker.InvokeUseCase(inputPort, outputPort)
 
 
@@ -69,20 +74,13 @@ class TestController():
 """
 Style Guide
 
-class: ExampleClass
-method: ExampleMethod
-parameter: exampleParameter
-instance member: m_ExampleMember
-local variable: _ExampleVariable
-constant: EXAMPLE_CONSTANT
-static member: s_ExampleMember
-
-class: ExampleClass
-method: example_method
-parameter: example_parameter
-instance member: _exampleMember
-local variable: _ExampleVariable
-constant: EXAMPLE_CONSTANT
-static member: s_ExampleMember
+module:         example     example_module
+class:          Example     ExampleClass
+method:         example     example_method
+parameter:      example     example_parameter
+member:         example     example_member
+private member: _example    _example_member
+variable:       _Example    _ExampleVariable
+constant:       EXAMPLE     EXAMPLE_CONSTANT
 
 """

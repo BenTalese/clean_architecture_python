@@ -9,4 +9,3 @@ class IInteractor(IPipe, Generic[TInputPort, TOutputPort], ABC):
     @property
     def Priority(self) -> PipePriority:
         return PipePriority.IInteractor
-    

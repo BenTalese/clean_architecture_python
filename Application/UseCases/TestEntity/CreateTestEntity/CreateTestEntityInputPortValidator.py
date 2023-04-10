@@ -6,11 +6,12 @@ from Application.Infrastructure.Pipes.IInputPortValidator import IInputPortValid
 class CreateTestEntityInputPortValidator(IInputPortValidator[CreateTestEntityInputPort, ICreateTestEntityOutputPort]):
 
     def Execute(self, inputPort: CreateTestEntityInputPort, outputPort: ICreateTestEntityOutputPort) -> bool:
-        self._failures = []
+        #self._failures = []
 
         if inputPort._input != "Hello":
-            self._failures.append("Text was not 'Hello'.")
-            self._failures.append("Another message for testing.")
+            self.m_Failures.append("Text was not 'Hello'.")
+            self.m_Failures.append("Another message for testing.")
+            outputPort.PresentValidationFailure(self.m_Failures)
 
         #if validationFailures:
             #outputPort.PresentValidationFailure(validationFailures)
