@@ -1,7 +1,7 @@
 from Application.Infrastructure.Pipes.IInteractor import IInteractor
 from Application.Services.IPersistence import IPersistence
-from .CreateTestEntityInputPort import CreateTestEntityInputPort
-from .ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
+from .create_test_entity_input_port import CreateTestEntityInputPort
+from .icreate_test_entity_output_port import ICreateTestEntityOutputPort
 from Application.Dtos.TestDto import TestDto
 from Domain.Entities.TestEntity import TestEntity
 import uuid

@@ -1,6 +1,6 @@
 from Application.Infrastructure.Pipes.IEntityExistenceChecker import IEntityExistenceChecker
-from .CreateTestEntityInputPort import CreateTestEntityInputPort
-from .ICreateTestEntityOutputPort import ICreateTestEntityOutputPort
+from .create_test_entity_input_port import CreateTestEntityInputPort
+from .icreate_test_entity_output_port import ICreateTestEntityOutputPort
 
 
 class CreateTestEntityExistenceChecker(IEntityExistenceChecker[CreateTestEntityInputPort, ICreateTestEntityOutputPort]):
