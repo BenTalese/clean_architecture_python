@@ -1,25 +1,25 @@
 from typing import Dict, List, Type
-from Application.Infrastructure.Pipes.IInputPort import IInputPort
+from Application.Infrastructure.Pipeline.IPipelineFactory import IPipelineFactory
 from Application.Infrastructure.Pipes.IPipe import IPipe
+from Domain.Infrastructure.Generics import TInputPort
+
+class PipelineFactory(IPipelineFactory):
+    
+    def __init__(self, useCaseRegistry: Dict[str, List[Type[IPipe]]]):
+        self.__useCaseRegistry = useCaseRegistry if useCaseRegistry is not None else ValueError(f"'{useCaseRegistry=}' cannot be None.")
 
 
-class PipelineFactory:
-    def __init__(self, pipeRegistry: Dict[str, List[Type[IPipe]]]):
-        self.m_PipeRegistry = pipeRegistry
+    def CreatePipeline(self, inputPort: TInputPort) -> List[Type[IPipe]]:
+        _UseCaseKey = inputPort.__module__.rsplit(".", 1)[0]
 
-    def create_pipeline(self, inputPort: IInputPort) -> List[Type[IPipe]]:
-        usecase_key = inputPort.__module__.rsplit(".", 1)[0]
-
-        if usecase_key not in self.m_PipeRegistry:
+        if _UseCaseKey not in self.__useCaseRegistry:
             raise KeyError(f"Could not find '{inputPort}' in the pipeline registry.")
         
-        pipes = self.m_PipeRegistry[usecase_key]["pipes"]
+        _Pipes = self.__useCaseRegistry[_UseCaseKey]["pipes"]
         
-        if pipes is None:
-            raise Exception(f"Pipeline registry for '{inputPort}' contained no pipes.")
+        #TODO: This feels like a weird check to have...
+        if any(_Pipe is None for _Pipe in _Pipes):
+            raise Exception(f"One of the pipes for the use case '{_UseCaseKey}' is not configured correctly.")
         
-        if any(pipe is None for pipe in pipes):
-            raise Exception(f"One of the pipes for the use case '{usecase_key}' is not configured correctly.")
-        
-        sorted_pipes = sorted(pipes, key=lambda pipe: pipe.Priority)
-        return sorted_pipes
+        _SortedPipes = sorted(_Pipes, key=lambda _Pipe: _Pipe.Priority)
+        return _SortedPipes
