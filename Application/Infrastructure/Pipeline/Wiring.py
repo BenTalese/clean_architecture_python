@@ -3,7 +3,6 @@ import importlib
 import inspect
 import os
 import re
-import sys
 from Application.Infrastructure.Pipeline.PipePriority import PipePriority
 from Application.Infrastructure.Pipeline.PipelineFactory import PipelineFactory
 from Application.Infrastructure.Pipeline.ServiceProvider import ServiceProvider
@@ -15,19 +14,13 @@ from Application.Infrastructure.Pipes.IEntityExistenceChecker import IEntityExis
 from Application.Infrastructure.Pipes.IInputPortValidator import IInputPortValidator
 from Application.Infrastructure.Pipes.IInteractor import IInteractor
 from Application.Infrastructure.Pipes.IPipe import IPipe
-from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInputPort import CreateTestEntityInputPort
-from Application.UseCases.TestEntity.CreateTestEntity.CreateTestEntityInteractor import CreateTestEntityInteractor
 from Domain.Errors.InterfaceNotImplementedError import InterfaceNotImplementedError
-from Framework.CreateTestEntityPresenter import CreateTestEntityPresenter
 from dependency_injector import providers
 from typing import Dict, List, Optional, Tuple, Type
-
-#sys.path.append(os.getcwd()) #TODO: fixes python unable to see Application.Infrastructure.etc...
 
 
 #TODO: find a place for this to live
 DIR_EXCLUSIONS = [r"__pycache__"]
-
 FILE_EXCLUSIONS = [r".*__init__\.py", r".*OutputPort\.py"]
 
 
@@ -53,20 +46,8 @@ class Wiring:
             raise Exception(f"Was not able to retrieve '{service.__name__}' from DI container.")
 
 
-    # TODO: Register pipelinescanner as singleton
-    # TODO: Register pipelinefactory as singleton
-    # THIS SHOULD PROBABLY BE USER DEFINED, DON'T DO IT FOR THEM
-    @staticmethod
-    def ConstructServiceProvider( # BuildClapyEngine()? Wiring.BuildEngine()? ConfigureServices()?
-        serviceProvider: ServiceProvider,
-        usecase_scan_locations: List[str],
-        scan_locations: List[str],
-        directory_exclusion_list: List[str],
-        file_exclusion_list: List[str]):
-        pass
-
-
     # TODO: Currently this registers everything as a factory (need option to do singleton), could be added to interface registry?
+    # TODO: ^^^ This problem would be solved by manual service registration, so not what this is which is Clapy-Auto
     @staticmethod
     def RegisterDependencies(
         serviceProvider: ServiceProvider,
@@ -77,8 +58,6 @@ class Wiring:
 
         directoryExclusionPatterns = directoryExclusionPatterns + DIR_EXCLUSIONS
         fileExclusionPatterns = fileExclusionPatterns + FILE_EXCLUSIONS
-        #directoryExclusionPatterns.append(DIR_EXCLUSIONS)
-        #fileExclusionPatterns.append(FILE_EXCLUSIONS)
 
         for _Location in dependencyScanLocations:
             for _Root, _Directories, _Files in os.walk(_Location):
@@ -89,15 +68,10 @@ class Wiring:
                     _Files[:] = [f for f in _Files if not re.match(_ExclusionPattern, f)]
 
                 for _File in _Files:
-                    _ModuleName = _File[:-3]
-                    _Module = importlib.import_module(f"{_Root.replace('/', '.')}.{_ModuleName}")
-                    _ModuleClass = getattr(_Module, _ModuleName, None)
+                    _Namespace = _Root.replace('/', '.') + "." + _File[:-3]
+                    _Class = Wiring.ImportClassByNamespace(_Namespace)
 
-                    if _ModuleClass is None:
-                        raise Exception(f"""Could not find class for '{_ModuleName}'. Classes must be named the same as their module to be registered
-                        in the dependency container. If you do not want this module to be scanned, add it to the file exclusions.""")
-
-                    Wiring.RegisterDependency(serviceProvider, _ModuleClass, interfaceRegistry)
+                    Wiring.RegisterDependency(serviceProvider, _Class, interfaceRegistry)
 
 
     @staticmethod
@@ -113,53 +87,59 @@ class Wiring:
         return classType
 
 
+    # TODO: Currently parameters will always be registered as factories, also the module itself will also always be a factory
+    # TODO: Something to think about, could use parameter name to determine factory or singleton, e.g. "DI_S_" is singleton, "DI_F_" is factory
     @staticmethod
-    def RegisterDependency(serviceProvider: ServiceProvider, classType: Type, interfaceRegistry: List[Tuple[type, type]]) -> object:
-        _ClassToRegister = Wiring.__TryGetConcreteImplementation(classType, interfaceRegistry)
+    def RegisterDependency(
+        serviceProvider: ServiceProvider,
+        classType: Type,
+        interfaceRegistry: List[Tuple[type, type]],
+        providerMethod: Optional[Type] = providers.Factory) -> object:
 
+        _ClassToRegister = Wiring.__TryGetConcreteImplementation(classType, interfaceRegistry)
         _DependencyName = Wiring.__GetServiceName(_ClassToRegister)
 
         if hasattr(serviceProvider, _DependencyName):
-            print(f"Skipped registering {_DependencyName} of type {_ClassToRegister} because container already has {_DependencyName} registered.")
             return getattr(serviceProvider, _DependencyName)
 
         _DependencyParametersFromConstructor = [_Param for _ParamName, _Param in inspect.signature(_ClassToRegister.__init__).parameters.items()
                                             if _ParamName.startswith("DI_") and _Param.annotation != inspect.Parameter.empty]
-
+        
         if not _DependencyParametersFromConstructor:
-            setattr(serviceProvider, _DependencyName, providers.Factory(_ClassToRegister))
+            setattr(serviceProvider, _DependencyName, providerMethod(_ClassToRegister))
             return getattr(serviceProvider, _DependencyName)
 
         _SubDependencies = []
         for _Dependency in _DependencyParametersFromConstructor:
             _SubDependencies.append(Wiring.RegisterDependency(serviceProvider, _Dependency.annotation, interfaceRegistry))
 
-        setattr(serviceProvider, _DependencyName, providers.Factory(_ClassToRegister, *_SubDependencies))
-
+        setattr(serviceProvider, _DependencyName, providerMethod(_ClassToRegister, *_SubDependencies))
         return getattr(serviceProvider, _DependencyName)
 
 
-    # TODO: Pipeline priority passed in, also this might be good as separate methods... maybe?
     @staticmethod
-    def RegisterPipeline(serviceProvider: ServiceProvider, useCaseRegistry: Dict[str, List[Type[IPipe]]]):
-        _FactoryRegistrationName = Wiring.__GetServiceName(PipelineFactory)
+    def ConstructUseCaseInvoker(
+        serviceProvider: ServiceProvider,
+        useCaseLocations: Optional[List[str]] = ["."],
+        directoryExclusionPatterns: Optional[List[str]] = [],
+        fileExclusionPatterns: Optional[List[str]] = []) -> UseCaseInvoker:
 
-        if hasattr(serviceProvider, _FactoryRegistrationName):
-            print(f"Skipped registering PipelineFactory because container already has one registered.")
-            return #TODO: probably don't just return
+        _UseCaseRegistry = Wiring.ConstructUseCaseRegistry(serviceProvider, useCaseLocations, directoryExclusionPatterns, fileExclusionPatterns)
 
-        setattr(serviceProvider, _FactoryRegistrationName, providers.Singleton(PipelineFactory, pipeRegistry=useCaseRegistry))
+        _PipelineFactoryRegistrationName = Wiring.__GetServiceName(PipelineFactory)
 
-        _Factory = getattr(serviceProvider, _FactoryRegistrationName)
+        if not hasattr(serviceProvider, _PipelineFactoryRegistrationName):
+            setattr(serviceProvider, _PipelineFactoryRegistrationName, providers.Singleton(PipelineFactory, pipeRegistry=_UseCaseRegistry))
 
-        _InvokerRegistrationName = Wiring.__GetServiceName(UseCaseInvoker)
-
-        #TODO: this is repeating code
-        if hasattr(serviceProvider, _InvokerRegistrationName):
-            print(f"Skipped registering PipelineFactory because container already has one registered.")
-            return #TODO: probably don't just return
+        _PipelineFactory = getattr(serviceProvider, _PipelineFactoryRegistrationName)
         
-        setattr(serviceProvider, _InvokerRegistrationName, providers.Factory(UseCaseInvoker, pipelineFactory=_Factory))
+        _UseCaseInvokerRegistrationName = Wiring.__GetServiceName(UseCaseInvoker)
+
+        if not hasattr(serviceProvider, _UseCaseInvokerRegistrationName):
+            setattr(serviceProvider, _UseCaseInvokerRegistrationName, providers.Factory(UseCaseInvoker, pipelineFactory=_PipelineFactory))
+        
+        return getattr(serviceProvider, _UseCaseInvokerRegistrationName)
+
 
     @staticmethod
     def ConstructUseCaseRegistry(
@@ -173,9 +153,10 @@ class Wiring:
 
         _UseCaseRegistry = {}
 
-        #TODO: this is repeating code "go through these locations and get the files excluding particular files/folders"
         for _Location in useCaseLocations:
             for _Root, _Directories, _Files in os.walk(_Location):
+                _DirectoryNamespace = _Root.replace('/', '.')
+
                 for _ExclusionPattern in directoryExclusionPatterns:
                     _Directories[:] = [d for d in _Directories if not re.match(_ExclusionPattern, d)]
 
@@ -185,27 +166,40 @@ class Wiring:
                 _Pipes = []
 
                 for _File in _Files:
-                    _ModuleName = _File[:-3]
-                    _Module = importlib.import_module(f"{_Root.replace('/', '.')}.{_ModuleName}", package=None)
-                    _ModuleClass = getattr(_Module, _ModuleName, None)
-                    if issubclass(_ModuleClass, IPipe):
+                    _Namespace = _DirectoryNamespace + "." + _File[:-3]
+
+                    _Class = Wiring.ImportClassByNamespace(_Namespace)
+
+                    if issubclass(_Class, IPipe):
                         try:
-                            _Pipes.append(Wiring.GetService(serviceProvider, _ModuleClass))
+                            _Pipes.append(Wiring.GetService(serviceProvider, _Class))
                         except TypeError:
-                            raise InterfaceNotImplementedError(_ModuleName)
+                            raise InterfaceNotImplementedError(_Namespace) #TODO: I'm getting a lot of other errors reported here
                 if _Pipes:
-                    _UseCaseRegistry[_Root.replace('/', '.')] = { "pipes": _Pipes }
-                    #pipes_registry[root.split("/")[-1]] = { "pipes": pipes }
-                    #pipes_registry[os.path.basename(dirpath)] = {"interactor": CreateTestEntityInteractor(Persistence()), "pipes": pipes}
+                    _UseCaseRegistry[_DirectoryNamespace] = { "pipes": _Pipes }
 
         return _UseCaseRegistry
+
+
+    @staticmethod
+    def ImportClassByNamespace(namespace: str):
+        _ModuleName = namespace.rsplit(".", 1)[1]
+        _Module = importlib.import_module(namespace, package=None)
+        _ModuleClass = getattr(_Module, _ModuleName, None)
+
+        if _ModuleClass is None:
+            raise Exception(f"""Could not find class for '{_ModuleName}'. Classes must be named the same as their module
+            to be registered in the dependency container. If you do not want this module to be scanned, add it to the
+            file exclusions, or be more specific with your scan locations.""")
+
+        return _ModuleClass
 
 
     @staticmethod
     def SetPipePriority(**kwargs):
         for key, value in Wiring.__GetDefaultPipePriorities().items():
             setattr(PipePriority, key, value)
-            
+
         for key, value in kwargs.items():
             setattr(PipePriority, key, value)
 
