@@ -19,13 +19,8 @@ from application.infrastructure.pipes.ipipe import IPipe
 from dependency_injector import providers
 from typing import Dict, List, Optional, Tuple, Type
 
-from domain.errors.interface_not_implemented_error import InterfaceNotImplementedError
-
-
-#TODO: find a place for this to live
 DIR_EXCLUSIONS = [r"__pycache__"]
-FILE_EXCLUSIONS = [r".*__init__\.py", r".*OutputPort\.py"]
-
+FILE_EXCLUSIONS = [r".*__init__\.py", r".*outputport\.py", r".*output_port\.py"]
 
 class Wiring:
 
@@ -176,10 +171,8 @@ class Wiring:
                     _Class = Wiring._import_class_by_namespace(_Namespace)
 
                     if issubclass(_Class, IPipe):
-                        try:
-                            _Pipes.append(Wiring.get_service(service_provider, _Class))
-                        except TypeError:
-                            raise InterfaceNotImplementedError(_Namespace) #TODO: I'm getting a lot of other errors reported here
+                        _Pipes.append(Wiring.get_service(service_provider, _Class))
+                        
                 if _Pipes:
                     _UsecaseRegistry[_DirectoryNamespace] = { "pipes": _Pipes }
 
@@ -188,14 +181,13 @@ class Wiring:
 
     @staticmethod
     def _import_class_by_namespace(namespace: str):
-        _ModuleName = "".join([s[0].upper() for s in namespace.rsplit(".", 1)[1].split("_")])
-        #_Module = importlib.import_module(namespace, package=None)
-        #_ModuleClass = getattr(_Module, _ModuleName, None)
-        _ModuleClass = inspect.getmembers(importlib.import_module(namespace, package=None), inspect.isclass)[0][1]
-
+        _ModuleName = "".join([part.lower() for part in namespace.rsplit(".", 1)[1].split("_")])
+        _Module = importlib.import_module(namespace, package=None)
+        _ModuleClasses = inspect.getmembers(_Module, inspect.isclass)
+        _ModuleClass = next((obj for name, obj in _ModuleClasses if name.lower() == _ModuleName), None)
 
         if _ModuleClass is None:
-            raise Exception(f"""Could not find class for '{_ModuleName}'. Classes must be named the same as their module
+            raise Exception(f"""Could not find class for '{namespace}'. Classes must be named the same as their module
             to be registered in the dependency container. If you do not want this module to be scanned, add it to the
             file exclusions, or be more specific with your scan locations.""")
 
