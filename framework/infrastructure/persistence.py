@@ -4,8 +4,8 @@ from domain.infrastructure.generics import TEntity
 
 
 class Persistence(IPersistence):
-    def __init__(self, DI_Test: ITestService):
-        self._test = DI_Test
+    def __init__(self, DI_test: ITestService):
+        self._test = DI_test
     
     def add(self, entity: TEntity) -> None:
         self._test.add(entity)
