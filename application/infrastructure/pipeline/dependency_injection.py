@@ -35,7 +35,6 @@ def get_service(service_provider: ServiceProvider, service: Type) -> object:
         raise LookupError(f"Was not able to retrieve '{service.__name__}' from DI container.")
 
 
-#TODO: Think about renaming this to generate_dependency_name()
 @staticmethod
 def _generate_service_name(service: Type) -> str:
     _TypeMatch = re.search(r"(?<=')[^']+(?=')", str(service))
