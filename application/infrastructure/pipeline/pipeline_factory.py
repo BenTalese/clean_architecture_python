@@ -1,7 +1,8 @@
 from typing import Dict, List, Type
+from application.infrastructure.pipeline.common import _import_class_by_namespace
+from application.infrastructure.pipeline.dependency_injection import get_service
 from application.infrastructure.pipeline.ipipeline_factory import IPipelineFactory
 from application.infrastructure.pipeline.service_provider import ServiceProvider
-from application.infrastructure.pipeline.wiring import Wiring
 from application.infrastructure.pipes.ipipe import IPipe
 from domain.infrastructure.generics import TInputPort
 
@@ -12,7 +13,7 @@ class PipelineFactory(IPipelineFactory):
         self._usecase_registry = usecase_registry if usecase_registry is not None else ValueError(f"'{usecase_registry=}' cannot be None.")
 
 
-    def create_pipeline(self, input_port: TInputPort) -> List[object[IPipe]]:
+    def create_pipeline(self, input_port: TInputPort) -> List[Type[IPipe]]:
         _UsecaseKey = input_port.__module__.rsplit(".", 1)[0]
 
         if _UsecaseKey not in self._usecase_registry:
@@ -20,8 +21,8 @@ class PipelineFactory(IPipelineFactory):
         
         _PipeNamespaces = self._usecase_registry[_UsecaseKey]["pipes"]
 
-        _PipeClasses = [Wiring.import_class_by_namespace(_Namespace) for _Namespace in _PipeNamespaces]
+        _PipeClasses = [_import_class_by_namespace(_Namespace) for _Namespace in _PipeNamespaces]
 
-        _Pipes = [Wiring.get_service(self._service_provider, _PipeClass) for _PipeClass in _PipeClasses]
+        _Pipes = [get_service(self._service_provider, _PipeClass) for _PipeClass in _PipeClasses]
         
         return sorted(_Pipes, key=lambda _Pipe: _Pipe.priority)

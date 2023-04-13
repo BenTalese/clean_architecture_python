@@ -5,15 +5,12 @@
 # For this i should define what they are required to do to hook things up and get it going
 # Will need to point out conventions that make this work out of the box, e.g.
 #   - DI_ for parameters
-#   - One class per file for DI
-#   - Class name matches module name
+#   - Must have exactly one class that matches the module by name per module
 #   - Interfaces must be registered first (idk if i like this one...)
 #   - Possibly DI_S_ for singleton...not sure
+# Also tell user they must overwrite pipe priority in use before assigning that priority to another pipe
+# Also, can demonstrate how you could have a "definitions.py" file with "ROOT_DIR = os.path.dirname(os.path.abspath(__file__))" that can be passed to scan everything...or maybe they can just pass "." ... not sure yet
 
-# TODO: Pipes folder should be under services...I think, maybe also OutputPorts?
-# TODO: Tell user they must overwrite pipe priority in use before assigning that priority to another pipe
-# TODO: Also, can demonstrate how you could have a "definitions.py" file with "ROOT_DIR = os.path.dirname(os.path.abspath(__file__))" that can be passed to scan everything...or maybe they can just pass "." ... not sure yet
-# TODO: Get rid of all the printing to the console...
 # TODO: Add a Wiring.RegisterService method that the user can use to add a service (or not, don't recreate a DI container)
 
 # TODO: Idea i had is this can be the Clapy-Auto version, but Clapy should be changed so it doesn't auto scan for things, and to resolve services, instead of DI'ing the pipe, use the "GetService()" method in the constructor
@@ -21,8 +18,12 @@
 
 
 
+from application.infrastructure.pipeline.auto_wiring import AutoWiring
+from application.infrastructure.pipeline.ipipeline_factory import IPipelineFactory
 from application.infrastructure.pipeline.iusecase_invoker import IUseCaseInvoker
+from application.infrastructure.pipeline.pipeline_factory import PipelineFactory
 from application.infrastructure.pipeline.service_provider import ServiceProvider
+from application.infrastructure.pipeline.usecase_invoker import UseCaseInvoker
 from application.infrastructure.pipeline.wiring import Wiring
 from application.services.ipersistence import IPersistence
 from application.services.itest_service import ITestService
@@ -31,11 +32,14 @@ from application.usecases.test_entity.create_test_entity.icreate_test_entity_out
 from framework.create_test_entity_presenter import CreateTestEntityPresenter
 from framework.infrastructure.persistence import Persistence
 from framework.infrastructure.test_infrastructure import TestInfrastructure
+from dependency_injector import providers
 
 
 INTERFACE_TO_CONCRETE = [
     (IPersistence, Persistence),
-    (ITestService, TestInfrastructure)
+    (ITestService, TestInfrastructure),
+    (IPipelineFactory, PipelineFactory),
+    (IUseCaseInvoker, UseCaseInvoker)
 ]
 
 _DIScanLocations = ["application/usecases", "framework/infrastructure"]
@@ -44,11 +48,13 @@ _UsecaseScanLocations = ["application/usecases"]
 
 _ServiceProvider = ServiceProvider()
 
-Wiring.set_pipe_priority(IAuthorisationEnforcer=0, IAuthenticationVerifier=3)
-Wiring.register_dependencies(_ServiceProvider, INTERFACE_TO_CONCRETE, _DIScanLocations)
-x = Wiring.construct_usecase_invoker(_ServiceProvider, _UsecaseScanLocations)
 
-_Invoker: IUseCaseInvoker = Wiring.get_service(_ServiceProvider, IUseCaseInvoker)
+
+Wiring.set_pipe_priority(IAuthorisationEnforcer=0, IAuthenticationVerifier=3)
+AutoWiring.register_dependencies(_ServiceProvider, INTERFACE_TO_CONCRETE, _DIScanLocations)
+AutoWiring.construct_usecase_invoker(_ServiceProvider, _UsecaseScanLocations)
+
+_Invoker: IUseCaseInvoker = AutoWiring.get_service(_ServiceProvider, IUseCaseInvoker, INTERFACE_TO_CONCRETE)
 
 #_Invoker.m_ContinueOnFailures = True
 
