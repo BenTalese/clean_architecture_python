@@ -1,14 +1,13 @@
 from typing import Dict, List, Type
 from application.infrastructure.pipeline.common import _import_class_by_namespace
-from application.infrastructure.pipeline.dependency_injection import get_service
 from application.infrastructure.pipeline.ipipeline_factory import IPipelineFactory
-from application.infrastructure.pipeline.service_provider import ServiceProvider
+from application.infrastructure.pipeline.iservice_provider import IServiceProvider
 from application.infrastructure.pipes.ipipe import IPipe
 from domain.infrastructure.generics import TInputPort
 
 class PipelineFactory(IPipelineFactory):
     
-    def __init__(self, service_provider: ServiceProvider, usecase_registry: Dict[str, List[Type[IPipe]]]):
+    def __init__(self, service_provider: IServiceProvider, usecase_registry: Dict[str, List[Type[IPipe]]]):
         self._service_provider = service_provider if service_provider is not None else ValueError(f"'{service_provider=}' cannot be None.")
         self._usecase_registry = usecase_registry if usecase_registry is not None else ValueError(f"'{usecase_registry=}' cannot be None.")
 
@@ -23,6 +22,6 @@ class PipelineFactory(IPipelineFactory):
 
         _PipeClasses = [_import_class_by_namespace(_Namespace) for _Namespace in _PipeNamespaces]
 
-        _Pipes = [get_service(self._service_provider, _PipeClass) for _PipeClass in _PipeClasses]
+        _Pipes = [self._service_provider.get_service(_PipeClass) for _PipeClass in _PipeClasses]
         
         return sorted(_Pipes, key=lambda _Pipe: _Pipe.priority)
