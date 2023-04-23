@@ -12,8 +12,8 @@ from dependency_injector import providers
 
 class DependencyInjectorServiceProvider(IDependencyInjectorServiceProvider):
 
-    def __init__(self, container: containers.DeclarativeContainer):
-        self._container = container
+    def __init__(self, ):
+        self._container = containers.DeclarativeContainer()
 
 
     def get_service(self, service: Type[TServiceType]) -> TServiceType:

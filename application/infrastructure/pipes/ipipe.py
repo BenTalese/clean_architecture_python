@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Generic
+from asyncio import Task
+from typing import Callable, Coroutine, Generic
 from application.infrastructure.pipeline.pipe_priority import PipePriority
 from domain.infrastructure.generics import TInputPort, TOutputPort
 
@@ -11,6 +12,7 @@ class IPipe(Generic[TInputPort, TOutputPort], ABC):
     def priority(self) -> PipePriority:
         pass
 
+
     @abstractmethod
-    def execute(self, input_port: TInputPort, output_port: TOutputPort) -> Callable | None:
+    async def execute_async(self, input_port: TInputPort, output_port: TOutputPort) -> Coroutine | None:
         pass

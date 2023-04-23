@@ -20,7 +20,7 @@ from framework.create_test_entity_presenter import CreateTestEntityPresenter
 from framework.infrastructure.persistence import Persistence
 from framework.infrastructure.test_infrastructure import TestInfrastructure
 
-_ServiceProvider = DependencyInjectorServiceProvider(Container())
+_ServiceProvider = DependencyInjectorServiceProvider()
 
 def RegisterStuff(service_provider: IDependencyInjectorServiceProvider):
     service_provider.register_service(providers.Factory, TestInfrastructure, ITestService) #TODO: important to point out to user that order of registration matters
