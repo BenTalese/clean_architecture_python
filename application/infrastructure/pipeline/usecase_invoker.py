@@ -43,14 +43,15 @@ class UseCaseInvoker(IUseCaseInvoker):
         _PipelineResult()
 
 
-    async def invoke_usecase_async(self, input_port: TInputPort, output_port: TOutputPort) -> None:
-        _Pipeline = self._pipeline_factory.create_pipeline(input_port)
+    async def invoke_usecase_async(self, input_port: TInputPort, output_port: TOutputPort):
+        _Pipeline = await asyncio.get_event_loop().run_in_executor(None, self._pipeline_factory.create_pipeline, input_port)
 
         _PipelineResult = None
         while _PipelineResult is None and len(_Pipeline) > 0:
+
             _Pipe = _Pipeline.pop(0)
+            
             _PipelineResult = await _Pipe.execute_async(input_port, output_port)
 
-            if _PipelineResult is not None:
+            if asyncio.iscoroutine(_PipelineResult):
                 await _PipelineResult
-                break

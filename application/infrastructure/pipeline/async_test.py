@@ -52,8 +52,8 @@ async def main():
     _Invoker = _ServiceProvider.get_service(IUseCaseInvoker)
 
     _Tasks = []
-    for i in range(20):
-        _Tasks.append(_Invoker.invoke_usecase_async(AsyncInputPort(random.randint(0, 15), i), AsyncPresenter()))
+    for i in range(7):
+        _Tasks.append(_Invoker.invoke_usecase_async(AsyncInputPort(i, i), AsyncPresenter()))
 
     start_time = time.time()
     print(f"start: {start_time}")
